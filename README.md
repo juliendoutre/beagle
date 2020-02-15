@@ -2,6 +2,20 @@
 
 A text search-engine over the Stanford CS276 document collection.
 
+## Install
+
+Run
+```shell
+pip3 install -e .
+```
+to install the package.
+
+## Usage
+
+```shell
+python3 -m beagle
+```
+
 ## Dataset
 
 The collection can be downloaded here: http://web.stanford.edu/class/cs276/pa/pa1-data.zip.
