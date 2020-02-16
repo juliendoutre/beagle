@@ -1,5 +1,7 @@
 import os
+import typing
 from typing import List
+from collections import Counter
 
 
 class Document:
@@ -14,6 +16,9 @@ class Document:
     def load(self) -> None:
         with open(self.path, "r") as f:
             self.tokens = f.read().split()
+
+    def term_frequencies(self) -> typing.Counter[str]:
+        return Counter(self.tokens)
 
 
 class Shard:
@@ -33,6 +38,14 @@ class Shard:
     def load(self) -> None:
         for d in self.documents:
             d.load()
+
+    def term_frequencies(self) -> typing.Counter[str]:
+        frequencies: typing.Counter[str] = Counter()
+
+        for d in self.documents:
+            frequencies.update(d.term_frequencies())
+
+        return frequencies
 
 
 class Collection:
@@ -56,3 +69,11 @@ class Collection:
     def load(self) -> None:
         for s in self.shards:
             s.load()
+
+    def term_frequencies(self) -> typing.Counter[str]:
+        frequencies: typing.Counter[str] = Counter()
+
+        for s in self.shards:
+            frequencies.update(s.term_frequencies())
+
+        return frequencies

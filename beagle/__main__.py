@@ -34,6 +34,8 @@ def main() -> None:
         print(collection)
         for s in collection.shards:
             print(s)
+        print(collection.term_frequencies().most_common(100))
+
     elif args.cmd == "search":
         pass
     else:
