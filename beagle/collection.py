@@ -3,6 +3,7 @@ import json
 import typing
 from typing import List
 from collections import Counter
+from beagle.logging import timer
 
 
 class Document:
@@ -55,7 +56,7 @@ class Shard:
 
         return frequencies
 
-    def filter(self, stop_words: List[str]) -> None:
+    def filter_documents(self, stop_words: List[str]) -> None:
         for d in self.documents:
             d.filter(stop_words)
 
@@ -70,19 +71,23 @@ class Collection:
     def __str__(self) -> str:
         return f"collection {self.name} ({self.path}): {len(self.shards)} shards"
 
+    @timer
     def scan_shards(self) -> None:
         for d in os.scandir(self.path):
             if d.is_dir():
                 self.shards.append(Shard(d.name, d.path))
 
+    @timer
     def scan_documents(self) -> None:
         for s in self.shards:
             s.scan_documents()
 
-    def load(self) -> None:
+    @timer
+    def load_documents(self) -> None:
         for s in self.shards:
             s.load()
 
+    @timer
     def term_frequencies(self) -> typing.Counter[str]:
         frequencies: typing.Counter[str] = Counter()
 
@@ -91,10 +96,12 @@ class Collection:
 
         return frequencies
 
+    @timer
     def load_stop_words_list(self, path: str) -> None:
         with open(path, "r") as f:
             self.stop_words = json.load(f)
 
-    def filter(self) -> None:
+    @timer
+    def filter_documents(self) -> None:
         for s in self.shards:
-            s.filter(self.stop_words)
+            s.filter_documents(self.stop_words)
