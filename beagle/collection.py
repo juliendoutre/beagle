@@ -1,7 +1,7 @@
 import os
 import json
 import typing
-from typing import List
+from typing import List, Set
 from collections import Counter
 from beagle.logging import timer
 from nltk.stem import WordNetLemmatizer
@@ -20,21 +20,27 @@ class Document:
         with open(self.path, "r") as f:
             self.tokens = f.read().split()
 
-    def term_frequencies(self) -> typing.Counter[str]:
-        return Counter(self.tokens)
-
     def filter(self, stop_words: List[str]) -> None:
         filtered_tokens: List[str] = []
+
         for t in self.tokens:
             if t not in stop_words:
                 filtered_tokens.append(t)
+
         self.tokens = filtered_tokens
 
     def lemmatize(self) -> None:
         lems: List[str] = []
         lemmatizer = WordNetLemmatizer()
+
         for t in self.tokens:
             lems.append(lemmatizer.lemmatize(t))
+
+    def get_vocabulary(self) -> Set[str]:
+        return set(self.tokens)
+
+    def term_frequencies(self) -> typing.Counter[str]:
+        return Counter(self.tokens)
 
 
 class Shard:
@@ -55,14 +61,6 @@ class Shard:
         for d in self.documents:
             d.load()
 
-    def term_frequencies(self) -> typing.Counter[str]:
-        frequencies: typing.Counter[str] = Counter()
-
-        for d in self.documents:
-            frequencies.update(d.term_frequencies())
-
-        return frequencies
-
     def filter_documents(self, stop_words: List[str]) -> None:
         for d in self.documents:
             d.filter(stop_words)
@@ -70,6 +68,22 @@ class Shard:
     def lemmatize_documents(self) -> None:
         for d in self.documents:
             d.lemmatize()
+
+    def get_vocabulary(self) -> Set[str]:
+        vocabulary: Set[str] = set()
+
+        for d in self.documents:
+            vocabulary.update(d.get_vocabulary())
+
+        return vocabulary
+
+    def term_frequencies(self) -> typing.Counter[str]:
+        frequencies: typing.Counter[str] = Counter()
+
+        for d in self.documents:
+            frequencies.update(d.term_frequencies())
+
+        return frequencies
 
 
 class Collection:
@@ -99,15 +113,6 @@ class Collection:
             s.load()
 
     @timer
-    def term_frequencies(self) -> typing.Counter[str]:
-        frequencies: typing.Counter[str] = Counter()
-
-        for s in self.shards:
-            frequencies.update(s.term_frequencies())
-
-        return frequencies
-
-    @timer
     def load_stop_words_list(self, path: str) -> None:
         with open(path, "r") as f:
             self.stop_words = json.load(f)
@@ -121,3 +126,20 @@ class Collection:
     def lemmatize_documents(self) -> None:
         for s in self.shards:
             s.lemmatize_documents()
+
+    def get_vocabulary(self) -> Set[str]:
+        vocabulary: Set[str] = set()
+
+        for s in self.shards:
+            vocabulary.update(s.get_vocabulary())
+
+        return vocabulary
+
+    @timer
+    def term_frequencies(self) -> typing.Counter[str]:
+        frequencies: typing.Counter[str] = Counter()
+
+        for s in self.shards:
+            frequencies.update(s.term_frequencies())
+
+        return frequencies

@@ -41,6 +41,8 @@ def main() -> None:
 
         collection.lemmatize_documents()
 
+        print(len(collection.get_vocabulary()))
+
     elif args.cmd == "search":
         pass
     else:
