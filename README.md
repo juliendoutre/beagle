@@ -22,9 +22,12 @@ The collection can be downloaded here: http://web.stanford.edu/class/cs276/pa/pa
 
 This is a 170MBs corpus organized in 10 folders. Each file contains a web page tokenized contents.
 
+## Stop words
+
+The english stop words list we use (saved in `stop_words.json`) comes from this post : https://gist.github.com/sebleier/554280.
+
 ## TODO
 
-- get the stop words and remove them from the collection
 - stem/lemmatize the tokens
 - get the vocabulary
 - create a reversed index

@@ -31,9 +31,14 @@ def main() -> None:
         collection.scan_shards()
         collection.scan_documents()
         collection.load()
+
         print(collection)
         for s in collection.shards:
             print(s)
+
+        print(collection.term_frequencies().most_common(100))
+        collection.load_stop_words_list("./stop_words.json")
+        collection.filter()
         print(collection.term_frequencies().most_common(100))
 
     elif args.cmd == "search":

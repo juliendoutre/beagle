@@ -1,4 +1,5 @@
 import os
+import json
 import typing
 from typing import List
 from collections import Counter
@@ -19,6 +20,13 @@ class Document:
 
     def term_frequencies(self) -> typing.Counter[str]:
         return Counter(self.tokens)
+
+    def filter(self, stop_words: List[str]) -> None:
+        filtered_tokens: List[str] = []
+        for t in self.tokens:
+            if t not in stop_words:
+                filtered_tokens.append(t)
+        self.tokens = filtered_tokens
 
 
 class Shard:
@@ -47,12 +55,17 @@ class Shard:
 
         return frequencies
 
+    def filter(self, stop_words: List[str]) -> None:
+        for d in self.documents:
+            d.filter(stop_words)
+
 
 class Collection:
     def __init__(self, name: str, path: str) -> None:
         self.name: str = name
         self.path: str = path
         self.shards: List[Shard] = []
+        self.stop_words: List[str] = []
 
     def __str__(self) -> str:
         return f"collection {self.name} ({self.path}): {len(self.shards)} shards"
@@ -77,3 +90,11 @@ class Collection:
             frequencies.update(s.term_frequencies())
 
         return frequencies
+
+    def load_stop_words_list(self, path: str) -> None:
+        with open(path, "r") as f:
+            self.stop_words = json.load(f)
+
+    def filter(self) -> None:
+        for s in self.shards:
+            s.filter(self.stop_words)
