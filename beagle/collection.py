@@ -4,6 +4,7 @@ import typing
 from typing import List
 from collections import Counter
 from beagle.logging import timer
+from nltk.stem import WordNetLemmatizer
 
 
 class Document:
@@ -28,6 +29,12 @@ class Document:
             if t not in stop_words:
                 filtered_tokens.append(t)
         self.tokens = filtered_tokens
+
+    def lemmatize(self) -> None:
+        lems: List[str] = []
+        lemmatizer = WordNetLemmatizer()
+        for t in self.tokens:
+            lems.append(lemmatizer.lemmatize(t))
 
 
 class Shard:
@@ -59,6 +66,10 @@ class Shard:
     def filter_documents(self, stop_words: List[str]) -> None:
         for d in self.documents:
             d.filter(stop_words)
+
+    def lemmatize_documents(self) -> None:
+        for d in self.documents:
+            d.lemmatize()
 
 
 class Collection:
@@ -105,3 +116,8 @@ class Collection:
     def filter_documents(self) -> None:
         for s in self.shards:
             s.filter_documents(self.stop_words)
+
+    @timer
+    def lemmatize_documents(self) -> None:
+        for s in self.shards:
+            s.lemmatize_documents()

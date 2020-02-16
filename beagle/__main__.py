@@ -39,6 +39,8 @@ def main() -> None:
         collection.load_stop_words_list("./stop_words.json")
         collection.filter_documents()
 
+        collection.lemmatize_documents()
+
     elif args.cmd == "search":
         pass
     else:

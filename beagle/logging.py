@@ -17,7 +17,7 @@ def timer(func):
         start_time = time.perf_counter()
         value = func(*args, **kwargs)
         logging.info(
-            f"Finished to {func.__name__!r} in {time.perf_counter() - start_time:4f} s."
+            f"Finished to {func.__name__!r} in {time.perf_counter() - start_time:4f}s."
         )
         return value
 

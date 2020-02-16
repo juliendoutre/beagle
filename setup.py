@@ -11,4 +11,5 @@ setup(
     packages=["beagle"],
     zip_safe=True,
     entry_points={"console_scripts": ["beagle = beagle.__main__:main"]},
+    install_requires=["nltk"],
 )
