@@ -21,3 +21,10 @@ python3 -m beagle
 The collection can be downloaded here: http://web.stanford.edu/class/cs276/pa/pa1-data.zip.
 
 This is a 170MBs corpus organized in 10 folders. Each file contains a web page tokenized contents.
+
+## TODO
+
+- get the stop words and remove them from the collection
+- stem/lemmatize the tokens
+- get the vocabulary
+- create a reversed index
