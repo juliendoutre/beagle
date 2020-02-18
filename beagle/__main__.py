@@ -5,7 +5,7 @@ import logging
 import argparse
 from beagle.logging import init_logger
 from beagle.collection import Collection
-from beagle.index import InvertedIndexType
+from beagle.index import InvertedIndexType, load_index
 
 
 def main() -> None:
@@ -40,6 +40,13 @@ def main() -> None:
     )
 
     search_parser = subparsers.add_parser("search", help="to query the collection")
+    search_parser.add_argument(
+        "-i",
+        "--index",
+        default="./index/index.json",
+        type=str,
+        help="path the saved index",
+    )
 
     args = parser.parse_args()
     if args.cmd == "index":
@@ -56,7 +63,7 @@ def main() -> None:
         index = collection.index(args.type)
         index.save(args.output)
     elif args.cmd == "search":
-        pass
+        index = load_index(args.index)
     else:
         raise parser.error(f"invalid command {args.cmd}")
 

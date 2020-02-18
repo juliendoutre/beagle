@@ -31,3 +31,12 @@ class InvertedIndex:
     def save(self, path: str) -> None:
         with open(path, "w") as f:
             json.dump({"type": self.type.value, "entries": self.entries}, f)
+
+
+@timer
+def load_index(path: str) -> InvertedIndex:
+    with open(path, "r") as f:
+        raw = json.load(f)
+        index = InvertedIndex(raw["type"])
+        index.entries = raw["entries"]
+        return index
