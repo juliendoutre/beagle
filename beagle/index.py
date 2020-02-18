@@ -1,11 +1,11 @@
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Tuple
 from beagle.logging import timer
 from enum import Enum
 import json
 import abc
 
 
-class InvertedIndexTypes(Enum):
+class InvertedIndexType(Enum):
     DOCUMENTS_INDEX = "documents"
     FREQUENCIES_INDEX = "frequencies"
     POSITIONS_INDEX = "positions"
@@ -39,7 +39,7 @@ class DocumentsInvertedIndexEntry(InvertedIndexEntry):
 
 
 class DocumentsInvertedIndex(InvertedIndex):
-    index_type: InvertedIndexTypes = InvertedIndexTypes.DOCUMENTS_INDEX
+    index_type: InvertedIndexType = InvertedIndexType.DOCUMENTS_INDEX
 
     def __init__(self) -> None:
         self.entries: Dict[str, DocumentsInvertedIndexEntry] = {}
@@ -48,6 +48,35 @@ class DocumentsInvertedIndex(InvertedIndex):
         return self.entries.get(term)
 
     def update(self, index: "DocumentsInvertedIndex") -> None:
+        for term in index.entries:
+            if term in self.entries:
+                self.entries[term].frequency += index.entries[term].frequency
+                self.entries[term].ids += index.entries[term].ids
+            else:
+                self.entries[term] = index.entries[term]
+
+    @timer
+    def save(self, path: str) -> None:
+        with open(path, "w") as f:
+            json.dump(self, f, default=lambda x: x.__dict__)
+
+
+class FrequenciesInvertedIndexEntry(InvertedIndexEntry):
+    def __init__(self, id: int, f: int) -> None:
+        self.frequency: int = 1
+        self.ids: List[Tuple[int, int]] = [(id, f)]
+
+
+class FrequenciesInvertedIndex(InvertedIndex):
+    index_type: InvertedIndexType = InvertedIndexType.FREQUENCIES_INDEX
+
+    def __init__(self) -> None:
+        self.entries: Dict[str, FrequenciesInvertedIndexEntry] = {}
+
+    def get(self, term: str) -> Optional[FrequenciesInvertedIndexEntry]:
+        return self.entries.get(term)
+
+    def update(self, index: "FrequenciesInvertedIndex") -> None:
         for term in index.entries:
             if term in self.entries:
                 self.entries[term].frequency += index.entries[term].frequency

@@ -5,7 +5,7 @@ import logging
 import argparse
 from beagle.logging import init_logger
 from beagle.collection import Collection
-from beagle.index import InvertedIndexTypes
+from beagle.index import InvertedIndexType
 
 
 def main() -> None:
@@ -26,9 +26,9 @@ def main() -> None:
     index_parser.add_argument(
         "-t",
         "--type",
-        type=InvertedIndexTypes,
-        choices=list(InvertedIndexTypes),
-        default=InvertedIndexTypes.DOCUMENTS_INDEX,
+        type=InvertedIndexType,
+        choices=list(InvertedIndexType),
+        default=InvertedIndexType.FREQUENCIES_INDEX,
         help="type of index",
     )
     index_parser.add_argument(
@@ -53,7 +53,7 @@ def main() -> None:
 
         collection.lemmatize_documents()
 
-        index = collection.index()
+        index = collection.index(args.type)
         index.save(args.output)
     elif args.cmd == "search":
         pass
