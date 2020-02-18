@@ -1,17 +1,7 @@
 import os
 import json
 import typing
-from beagle.index import (
-    InvertedIndex,
-    InvertedIndexEntry,
-    InvertedIndexType,
-    DocumentsInvertedIndexEntry,
-    DocumentsInvertedIndex,
-    FrequenciesInvertedIndexEntry,
-    FrequenciesInvertedIndex,
-    PositionsInvertedIndexEntry,
-    PositionsInvertedIndex,
-)
+from beagle.index import InvertedIndex, InvertedIndexType
 from typing import List, Set, Dict, Tuple, Any
 from collections import Counter
 from beagle.logging import timer
@@ -112,43 +102,38 @@ class Shard:
         return frequencies
 
     def index(self, index_type: InvertedIndexType) -> InvertedIndex:
+        index = InvertedIndex(index_type)
         if index_type == InvertedIndexType.DOCUMENTS_INDEX:
-            index = DocumentsInvertedIndex()
             for d in self.documents:
-                frequencies = d.term_frequencies()
-                for t in frequencies:
+                for t in list(set(d.tokens)):
                     if t in index.entries:
-                        index.entries[t].frequency += 1
-                        index.entries[t].ids.append(d.id)
+                        index.entries[t][0] += 1
+                        index.entries[t][1].append(d.id)
                     else:
-                        index.entries[t] = DocumentsInvertedIndexEntry(d.id)
-
+                        index.entries[t] = [1, [d.id]]
         elif index_type == InvertedIndexType.FREQUENCIES_INDEX:
-            index = FrequenciesInvertedIndex()
             for d in self.documents:
                 frequencies = d.term_frequencies()
                 for t in frequencies:
                     if t in index.entries:
-                        index.entries[t].frequency += 1
-                        index.entries[t].ids.append((d.id, frequencies[t]))
+                        index.entries[t][0] += 1
+                        index.entries[t][1].append((d.id, frequencies[t]))
                     else:
-                        index.entries[t] = FrequenciesInvertedIndexEntry(
-                            d.id, frequencies[t]
-                        )
+                        index.entries[t] = [1, [(d.id, frequencies[t])]]
         else:
-            index = PositionsInvertedIndex()
             for d in self.documents:
                 positions = d.term_positions()
                 for t in positions:
                     if t in index.entries:
-                        index.entries[t].frequency += 1
-                        index.entries[t].ids.append(
+                        index.entries[t][0] += 1
+                        index.entries[t][1].append(
                             (d.id, positions[t][0], positions[t][1])
                         )
                     else:
-                        index.entries[t] = PositionsInvertedIndexEntry(
-                            d.id, positions[t][0], positions[t][1]
-                        )
+                        index.entries[t] = [
+                            1,
+                            [(d.id, positions[t][0], positions[t][1])],
+                        ]
 
         return index
 
@@ -213,12 +198,7 @@ class Collection:
 
     @timer
     def index(self, index_type: InvertedIndexType) -> InvertedIndex:
-        if index_type == InvertedIndexType.DOCUMENTS_INDEX:
-            index = DocumentsInvertedIndex()
-        elif index_type == InvertedIndexType.FREQUENCIES_INDEX:
-            index = FrequenciesInvertedIndex()
-        else:
-            index = PositionsInvertedIndex()
+        index = InvertedIndex(index_type)
 
         for s in self.shards:
             index.update(s.index(index_type))
