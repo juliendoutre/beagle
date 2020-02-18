@@ -4,7 +4,13 @@ import typing
 from typing import List, Set
 from collections import Counter
 from beagle.logging import timer
-from beagle.index import InvertedIndex, InvertedIndexEntry
+from beagle.index import (
+    InvertedIndex,
+    InvertedIndexEntry,
+    InvertedIndexTypes,
+    DocumentsInvertedIndexEntry,
+    DocumentsInvertedIndex,
+)
 from nltk.stem import WordNetLemmatizer
 
 
@@ -89,8 +95,15 @@ class Shard:
 
         return frequencies
 
-    def index(self) -> InvertedIndex:
-        index = InvertedIndex()
+    def index(
+        self, index_type: InvertedIndexTypes = InvertedIndexTypes.DOCUMENTS_INDEX
+    ) -> InvertedIndex:
+        if index_type == InvertedIndexTypes.DOCUMENTS_INDEX:
+            index = DocumentsInvertedIndex()
+        elif index_type == InvertedIndexTypes.FREQUENCIES_INDEX:
+            index = DocumentsInvertedIndex()
+        else:
+            index = DocumentsInvertedIndex()
 
         for d in self.documents:
             for t in list(set(d.tokens)):
@@ -162,8 +175,17 @@ class Collection:
         return frequencies
 
     @timer
-    def index(self) -> InvertedIndex:
-        index = InvertedIndex()
+    def index(
+        self, index_type: InvertedIndexTypes = InvertedIndexTypes.DOCUMENTS_INDEX
+    ) -> InvertedIndex:
+        if index_type == InvertedIndexTypes.DOCUMENTS_INDEX:
+            index = DocumentsInvertedIndex()
+        elif index_type == InvertedIndexTypes.FREQUENCIES_INDEX:
+            index = DocumentsInvertedIndex()
+        else:
+            index = DocumentsInvertedIndex()
+
         for s in self.shards:
-            index.update(s.index())
+            index.update(s.index(index_type=index_type))
+
         return index

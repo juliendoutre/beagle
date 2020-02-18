@@ -5,6 +5,7 @@ import logging
 import argparse
 from beagle.logging import init_logger
 from beagle.collection import Collection
+from beagle.index import InvertedIndexTypes
 
 
 def main() -> None:
@@ -21,6 +22,14 @@ def main() -> None:
     index_parser = subparsers.add_parser("index", help="to index the collection")
     index_parser.add_argument(
         "-d", "--dataset", default="./dataset", type=str, help="path to the dataset"
+    )
+    index_parser.add_argument(
+        "-t",
+        "--type",
+        default=InvertedIndexTypes.DOCUMENTS_INDEX,
+        choices=list(InvertedIndexTypes),
+        type=InvertedIndexTypes,
+        help="type of index",
     )
 
     search_parser = subparsers.add_parser("search", help="to query the collection")
