@@ -28,7 +28,6 @@ The english stop words list we use (saved in `stop_words.json`) comes from this 
 
 ## TODO
 
-- fix mess about the index types
 - compress index saved on disk
 - load index from file
 - add search module using boolean model research
