@@ -28,4 +28,4 @@ The english stop words list we use (saved in `stop_words.json`) comes from this 
 
 ## TODO
 
-- create a reversed index
+- compress index saved on disk

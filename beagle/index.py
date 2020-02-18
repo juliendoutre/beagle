@@ -88,3 +88,32 @@ class FrequenciesInvertedIndex(InvertedIndex):
     def save(self, path: str) -> None:
         with open(path, "w") as f:
             json.dump(self, f, default=lambda x: x.__dict__)
+
+
+class PositionsInvertedIndexEntry(InvertedIndexEntry):
+    def __init__(self, id: int, f: int, positions: List[int]) -> None:
+        self.frequency: int = 1
+        self.ids: List[Tuple[int, int, List[int]]] = [(id, f, positions)]
+
+
+class PositionsInvertedIndex(InvertedIndex):
+    index_type: InvertedIndexType = InvertedIndexType.POSITIONS_INDEX
+
+    def __init__(self) -> None:
+        self.entries: Dict[str, PositionsInvertedIndexEntry] = {}
+
+    def get(self, term: str) -> Optional[PositionsInvertedIndexEntry]:
+        return self.entries.get(term)
+
+    def update(self, index: "FrequenciesInvertedIndex") -> None:
+        for term in index.entries:
+            if term in self.entries:
+                self.entries[term].frequency += index.entries[term].frequency
+                self.entries[term].ids += index.entries[term].ids
+            else:
+                self.entries[term] = index.entries[term]
+
+    @timer
+    def save(self, path: str) -> None:
+        with open(path, "w") as f:
+            json.dump(self, f, default=lambda x: x.__dict__)

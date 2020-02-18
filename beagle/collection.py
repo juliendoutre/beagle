@@ -9,8 +9,10 @@ from beagle.index import (
     DocumentsInvertedIndex,
     FrequenciesInvertedIndexEntry,
     FrequenciesInvertedIndex,
+    PositionsInvertedIndexEntry,
+    PositionsInvertedIndex,
 )
-from typing import List, Set
+from typing import List, Set, Dict, Tuple, Any
 from collections import Counter
 from beagle.logging import timer
 from nltk.stem import WordNetLemmatizer
@@ -51,6 +53,18 @@ class Document:
 
     def term_frequencies(self) -> typing.Counter[str]:
         return Counter(self.tokens)
+
+    def term_positions(self) -> Dict[str, List[Any]]:
+        positions: Dict[str, List[Any]] = {}
+
+        for (i, t) in enumerate(self.tokens):
+            if t in positions:
+                positions[t][0] += 1
+                positions[t][1].append(i)
+            else:
+                positions[t] = [1, [i]]
+
+        return positions
 
 
 class Shard:
@@ -122,7 +136,19 @@ class Shard:
                             d.id, frequencies[t]
                         )
         else:
-            index = DocumentsInvertedIndex()
+            index = PositionsInvertedIndex()
+            for d in self.documents:
+                positions = d.term_positions()
+                for t in positions:
+                    if t in index.entries:
+                        index.entries[t].frequency += 1
+                        index.entries[t].ids.append(
+                            (d.id, positions[t][0], positions[t][1])
+                        )
+                    else:
+                        index.entries[t] = PositionsInvertedIndexEntry(
+                            d.id, positions[t][0], positions[t][1]
+                        )
 
         return index
 
@@ -192,7 +218,7 @@ class Collection:
         elif index_type == InvertedIndexType.FREQUENCIES_INDEX:
             index = FrequenciesInvertedIndex()
         else:
-            index = DocumentsInvertedIndex()
+            index = PositionsInvertedIndex()
 
         for s in self.shards:
             index.update(s.index(index_type))

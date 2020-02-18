@@ -28,7 +28,7 @@ def main() -> None:
         "--type",
         type=InvertedIndexType,
         choices=list(InvertedIndexType),
-        default=InvertedIndexType.FREQUENCIES_INDEX,
+        default=InvertedIndexType.POSITIONS_INDEX,
         help="type of index",
     )
     index_parser.add_argument(
