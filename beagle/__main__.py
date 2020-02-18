@@ -48,20 +48,13 @@ def main() -> None:
         collection.scan_documents()
         collection.load_documents()
 
-        print(collection)
-        for s in collection.shards:
-            print(s)
-
         collection.load_stop_words_list("./stop_words.json")
         collection.filter_documents()
 
         collection.lemmatize_documents()
 
-        print(len(collection.get_vocabulary()))
-
         index = collection.index()
         index.save(args.output)
-
     elif args.cmd == "search":
         pass
     else:

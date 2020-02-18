@@ -1,9 +1,6 @@
 import os
 import json
 import typing
-from typing import List, Set
-from collections import Counter
-from beagle.logging import timer
 from beagle.index import (
     InvertedIndex,
     InvertedIndexEntry,
@@ -11,6 +8,9 @@ from beagle.index import (
     DocumentsInvertedIndexEntry,
     DocumentsInvertedIndex,
 )
+from typing import List, Set
+from collections import Counter
+from beagle.logging import timer
 from nltk.stem import WordNetLemmatizer
 
 
