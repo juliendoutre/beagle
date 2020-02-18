@@ -1,5 +1,6 @@
 from typing import Dict, Optional, List
 from enum import Enum
+import json
 import abc
 
 
@@ -25,6 +26,10 @@ class InvertedIndex(abc.ABC):
     def get(self, term: str) -> Optional[InvertedIndexEntry]:
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def save(self, path: str) -> None:
+        raise NotImplementedError
+
 
 class DocumentsInvertedIndexEntry(InvertedIndexEntry):
     def __init__(self, id: int) -> None:
@@ -46,3 +51,7 @@ class DocumentsInvertedIndex(InvertedIndex):
                 self.entries[term].ids += index.entries[term].ids
             else:
                 self.entries[term] = index.entries[term]
+
+    def save(self, path: str) -> None:
+        with open(path, "w") as f:
+            json.dump(self, f, default=lambda x: x.__dict__)

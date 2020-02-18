@@ -59,7 +59,8 @@ def main() -> None:
 
         print(len(collection.get_vocabulary()))
 
-        print(len(collection.index().entries))
+        index = collection.index()
+        index.save(args.output)
 
     elif args.cmd == "search":
         pass
