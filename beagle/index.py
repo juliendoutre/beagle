@@ -105,7 +105,7 @@ class PositionsInvertedIndex(InvertedIndex):
     def get(self, term: str) -> Optional[PositionsInvertedIndexEntry]:
         return self.entries.get(term)
 
-    def update(self, index: "FrequenciesInvertedIndex") -> None:
+    def update(self, index: "PositionsInvertedIndex") -> None:
         for term in index.entries:
             if term in self.entries:
                 self.entries[term].frequency += index.entries[term].frequency
