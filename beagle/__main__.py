@@ -43,6 +43,8 @@ def main() -> None:
 
         print(len(collection.get_vocabulary()))
 
+        print(len(collection.index().entries))
+
     elif args.cmd == "search":
         pass
     else:

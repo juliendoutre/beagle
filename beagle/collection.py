@@ -4,13 +4,15 @@ import typing
 from typing import List, Set
 from collections import Counter
 from beagle.logging import timer
+from beagle.index import InvertedIndex, InvertedIndexEntry
 from nltk.stem import WordNetLemmatizer
 
 
 class Document:
-    def __init__(self, name: str, path: str) -> None:
+    def __init__(self, name: str, path: str, id: int) -> None:
         self.name: str = name
         self.path: str = path
+        self.id: int = id
         self.tokens: List[str] = []
 
     def __str__(self) -> str:
@@ -53,9 +55,11 @@ class Shard:
         return f"shard {self.name} ({self.path}): {len(self.documents)} documents"
 
     def scan_documents(self) -> None:
+        id = 10 ** 6 * int(self.name)
         for f in os.scandir(self.path):
             if f.is_file():
-                self.documents.append(Document(f.name, f.path))
+                self.documents.append(Document(f.name, f.path, id))
+                id += 1
 
     def load(self) -> None:
         for d in self.documents:
@@ -84,6 +88,19 @@ class Shard:
             frequencies.update(d.term_frequencies())
 
         return frequencies
+
+    def index(self) -> InvertedIndex:
+        index = InvertedIndex()
+
+        for d in self.documents:
+            for t in list(set(d.tokens)):
+                if t in index.entries:
+                    index.entries[t].frequency += 1
+                    index.entries[t].ids.append(d.id)
+                else:
+                    index.entries[t] = InvertedIndexEntry(d.id)
+
+        return index
 
 
 class Collection:
@@ -143,3 +160,10 @@ class Collection:
             frequencies.update(s.term_frequencies())
 
         return frequencies
+
+    @timer
+    def index(self) -> InvertedIndex:
+        index = InvertedIndex()
+        for s in self.shards:
+            index.update(s.index())
+        return index
