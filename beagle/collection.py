@@ -111,7 +111,7 @@ class Shard:
                     index.entries[t].frequency += 1
                     index.entries[t].ids.append(d.id)
                 else:
-                    index.entries[t] = InvertedIndexEntry(d.id)
+                    index.entries[t] = DocumentsInvertedIndexEntry(d.id)
 
         return index
 

@@ -21,15 +21,22 @@ def main() -> None:
 
     index_parser = subparsers.add_parser("index", help="to index the collection")
     index_parser.add_argument(
-        "-d", "--dataset", default="./dataset", type=str, help="path to the dataset"
+        "-d", "--dataset", type=str, default="./dataset", help="path to the dataset"
     )
     index_parser.add_argument(
         "-t",
         "--type",
-        default=InvertedIndexTypes.DOCUMENTS_INDEX,
-        choices=list(InvertedIndexTypes),
         type=InvertedIndexTypes,
+        choices=list(InvertedIndexTypes),
+        default=InvertedIndexTypes.DOCUMENTS_INDEX,
         help="type of index",
+    )
+    index_parser.add_argument(
+        "-o",
+        "--output",
+        default="./index/index.json",
+        type=str,
+        help="path to which save the dataset",
     )
 
     search_parser = subparsers.add_parser("search", help="to query the collection")
