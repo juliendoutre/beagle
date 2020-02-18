@@ -1,4 +1,5 @@
 from typing import Dict, Optional, List
+from beagle.logging import timer
 from enum import Enum
 import json
 import abc
@@ -34,10 +35,12 @@ class InvertedIndex(abc.ABC):
 class DocumentsInvertedIndexEntry(InvertedIndexEntry):
     def __init__(self, id: int) -> None:
         self.frequency: int = 1
-        self.ids: List[int] = []
+        self.ids: List[int] = [id]
 
 
 class DocumentsInvertedIndex(InvertedIndex):
+    index_type: InvertedIndexTypes = InvertedIndexTypes.DOCUMENTS_INDEX
+
     def __init__(self) -> None:
         self.entries: Dict[str, DocumentsInvertedIndexEntry] = {}
 
@@ -52,6 +55,7 @@ class DocumentsInvertedIndex(InvertedIndex):
             else:
                 self.entries[term] = index.entries[term]
 
+    @timer
     def save(self, path: str) -> None:
         with open(path, "w") as f:
             json.dump(self, f, default=lambda x: x.__dict__)
