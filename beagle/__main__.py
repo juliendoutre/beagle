@@ -6,7 +6,7 @@ import argparse
 from beagle.logging import init_logger
 from beagle.collection import Collection
 from beagle.index import InvertedIndexType, load_index
-from beagle.engine import EngineType, BinarySearchEngine
+from beagle.binary_search_engine import EngineType, BinarySearchEngine
 
 
 def main() -> None:
