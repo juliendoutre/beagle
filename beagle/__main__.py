@@ -55,9 +55,6 @@ def main() -> None:
         default=EngineType.BINARY_SEARCH,
         help="the engine to use to perform queries",
     )
-    search_parser.add_argument(
-        "query", type=str, help="the query to submit to the search engine"
-    )
 
     args = parser.parse_args()
     if args.cmd == "index":
@@ -77,7 +74,15 @@ def main() -> None:
         index = load_index(args.index)
         if args.engine == EngineType.BINARY_SEARCH:
             engine = BinarySearchEngine(index)
-            print(engine.query(args.query))
+
+            while True:
+                print("beagle>", end=" ")
+
+                user_input = input()
+                if user_input == ".exit":
+                    return
+
+                print(engine.query(user_input))
     else:
         raise parser.error(f"invalid command {args.cmd}")
 
