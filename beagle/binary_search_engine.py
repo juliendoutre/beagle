@@ -1,22 +1,14 @@
-from enum import Enum
 from beagle.logging import timer
 from beagle.index import InvertedIndex
+from beagle.search_engines import SearchEngine
 from nltk.stem import WordNetLemmatizer
 from typing import List
-
 import tt
 
 
-class EngineType(Enum):
-    BINARY_SEARCH = "binary"
-
-    def __str__(self) -> str:
-        return self.value
-
-
-class BinarySearchEngine:
+class BinarySearchEngine(SearchEngine):
     def __init__(self, index: InvertedIndex) -> None:
-        self.index = index
+        self.index: InvertedIndex = index
 
     def process_query(self, query: str) -> tt.ExpressionTreeNode:
         lemmatizer = WordNetLemmatizer()

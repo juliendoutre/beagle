@@ -6,7 +6,9 @@ import argparse
 from beagle.logging import init_logger
 from beagle.collection import Collection
 from beagle.index import InvertedIndexType, load_index
-from beagle.binary_search_engine import EngineType, BinarySearchEngine
+from beagle.binary_search_engine import BinarySearchEngine
+from beagle.vectorial_search_engine import VectorialSearchEngine
+from beagle.search_engines import EngineType, SearchEngine
 
 
 def main() -> None:
@@ -72,16 +74,22 @@ def main() -> None:
         index.save(args.output)
     elif args.cmd == "search":
         index = load_index(args.index)
+
+        engine: SearchEngine
         if args.engine == EngineType.BINARY_SEARCH:
             engine = BinarySearchEngine(index)
+        elif args.engine == EngineType.VECTORIAL_SEARCH:
+            engine = VectorialSearchEngine(index)
 
-            while True:
-                print("beagle>", end=" ")
+        while True:
+            print("beagle>", end=" ")
 
-                user_input = input()
-                if user_input == ".exit":
-                    return
-
+            user_input = input()
+            if user_input == ".exit":
+                return
+            elif user_input == ".engine":
+                print(args.engine)
+            else:
                 print(engine.query(user_input))
     else:
         raise parser.error(f"invalid command {args.cmd}")
