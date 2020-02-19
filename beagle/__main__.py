@@ -6,6 +6,7 @@ import argparse
 from beagle.logging import init_logger
 from beagle.collection import Collection
 from beagle.index import InvertedIndexType, load_index
+from beagle.engine import EngineType, BinarySearchEngine
 
 
 def main() -> None:
@@ -34,8 +35,8 @@ def main() -> None:
     index_parser.add_argument(
         "-o",
         "--output",
-        default="./index/index.json",
         type=str,
+        default="./index/index.json",
         help="path to which save the dataset",
     )
 
@@ -43,9 +44,19 @@ def main() -> None:
     search_parser.add_argument(
         "-i",
         "--index",
-        default="./index/index.json",
         type=str,
+        default="./index/index.json",
         help="path the saved index",
+    )
+    search_parser.add_argument(
+        "-e",
+        "--engine",
+        type=EngineType,
+        default=EngineType.BINARY_SEARCH,
+        help="the engine to use to perform queries",
+    )
+    search_parser.add_argument(
+        "query", type=str, help="the query to submit to the search engine"
     )
 
     args = parser.parse_args()
@@ -64,6 +75,9 @@ def main() -> None:
         index.save(args.output)
     elif args.cmd == "search":
         index = load_index(args.index)
+        if args.engine == EngineType.BINARY_SEARCH:
+            engine = BinarySearchEngine(index)
+            print(engine.query(args.query))
     else:
         raise parser.error(f"invalid command {args.cmd}")
 

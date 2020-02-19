@@ -10,7 +10,7 @@ class InvertedIndexType(Enum):
     FREQUENCIES_INDEX = "frequencies"
     POSITIONS_INDEX = "positions"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
