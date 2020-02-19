@@ -16,7 +16,7 @@ class BinarySearchEngine(SearchEngine):
 
         a = []
         for token in q:
-            if token not in ["OR", "AND"]:
+            if token not in ["OR", "AND", "NAND"]:
                 a.append(lemmatizer.lemmatize(token.lower()))
             else:
                 a.append(token)
@@ -30,6 +30,10 @@ class BinarySearchEngine(SearchEngine):
             )
         elif node._symbol_name == "OR":
             return merge(
+                self.compute_query(node._l_child), self.compute_query(node._r_child)
+            )
+        elif node._symbol_name == "NAND":
+            return exclude(
                 self.compute_query(node._l_child), self.compute_query(node._r_child)
             )
         else:
@@ -73,3 +77,7 @@ def intersect(a: List[int], b: List[int]) -> List[int]:
             j += 1
 
     return result
+
+
+def exclude(a: List[int], b: List[int]) -> List[int]:
+    return [i for i in a if i not in b]

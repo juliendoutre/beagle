@@ -29,6 +29,5 @@ The english stop words list we use (saved in `stop_words.json`) comes from this 
 ## TODO
 
 - compress index saved on disk
-- support "NOT" in boolean model
 - add search module using vector model research
 - format responses
