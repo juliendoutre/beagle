@@ -1,8 +1,7 @@
-from typing import Dict, Optional, List, Tuple, Any
+from typing import Dict, Any
 from beagle.logging import timer
 from enum import Enum
 import json
-import abc
 
 
 class InvertedIndexType(Enum):

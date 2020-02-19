@@ -35,7 +35,7 @@ class BinarySearchEngine(SearchEngine):
         else:
             try:
                 return [a[0] for a in self.index.entries[node._symbol_name][1]]
-            except:
+            except Exception:
                 return []
 
     @timer

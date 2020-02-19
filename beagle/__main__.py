@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import logging
 import argparse
 from beagle.logging import init_logger
 from beagle.collection import Collection

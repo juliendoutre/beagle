@@ -1,7 +1,6 @@
 from beagle.logging import timer
 from beagle.index import InvertedIndex
 from beagle.search_engines import SearchEngine
-from nltk.stem import WordNetLemmatizer
 from typing import List
 
 

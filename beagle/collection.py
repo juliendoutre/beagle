@@ -2,7 +2,7 @@ import os
 import json
 import typing
 from beagle.index import InvertedIndex, InvertedIndexType
-from typing import List, Set, Dict, Tuple, Any
+from typing import List, Set, Dict, Any
 from collections import Counter
 from beagle.logging import timer
 from nltk.stem import WordNetLemmatizer
