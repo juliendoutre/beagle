@@ -29,5 +29,6 @@ The english stop words list we use (saved in `stop_words.json`) comes from this 
 ## TODO
 
 - compress index saved on disk
-- add search module using vector model research
+- make vectorial model configurable in cli
+- allow to change models in cli
 - format responses

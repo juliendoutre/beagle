@@ -8,6 +8,7 @@ from beagle.index import InvertedIndexType, load_index
 from beagle.binary_search_engine import BinarySearchEngine
 from beagle.vectorial_search_engine import VectorialSearchEngine
 from beagle.search_engines import EngineType, SearchEngine
+from beagle.stats import load_stats
 
 
 def main() -> None:
@@ -37,17 +38,17 @@ def main() -> None:
         "-o",
         "--output",
         type=str,
-        default="./index/index.json",
-        help="path to which save the dataset",
+        default="./index/",
+        help="path to which save the index and stats",
     )
 
     search_parser = subparsers.add_parser("search", help="to query the collection")
     search_parser.add_argument(
         "-i",
-        "--index",
+        "--input",
         type=str,
-        default="./index/index.json",
-        help="path the saved index",
+        default="./index/",
+        help="path to the saved index and stats",
     )
     search_parser.add_argument(
         "-e",
@@ -70,15 +71,19 @@ def main() -> None:
         collection.lemmatize_documents()
 
         index = collection.index(args.type)
-        index.save(args.output)
+        index.save(args.output + "index.json")
+
+        stats = collection.compute_stats()
+        stats.save(args.output + "stats.json")
     elif args.cmd == "search":
-        index = load_index(args.index)
+        index = load_index(args.input + "index.json")
 
         engine: SearchEngine
         if args.engine == EngineType.BINARY_SEARCH:
             engine = BinarySearchEngine(index)
         elif args.engine == EngineType.VECTORIAL_SEARCH:
-            engine = VectorialSearchEngine(index)
+            stats = load_stats(args.input + "stats.json")
+            engine = VectorialSearchEngine(index, stats, 10)
 
         while True:
             print("beagle>", end=" ")

@@ -1,11 +1,11 @@
 from enum import Enum
 import abc
-from typing import List
+from typing import Dict
 
 
 class SearchEngine(abc.ABC):
     @abc.abstractmethod
-    def query(self, query: str) -> List[int]:
+    def query(self, query: str) -> Dict[int, float]:
         raise NotImplementedError
 
 

@@ -2,6 +2,7 @@ import os
 import json
 import typing
 from beagle.index import InvertedIndex, InvertedIndexType
+from beagle.stats import Stats
 from typing import List, Set, Dict, Any
 from collections import Counter
 from beagle.logging import timer
@@ -56,6 +57,22 @@ class Document:
 
         return positions
 
+    def stats(self) -> Dict[str, int]:
+        unique_terms_number = 0
+
+        frequencies = self.term_frequencies()
+        for t in frequencies:
+            if frequencies[t] == 1:
+                unique_terms_number += 1
+
+        f = [frequencies[t] for t in frequencies]
+
+        return {
+            "max_frequency": max(f),
+            "summed_frequency": sum(f),
+            "unique_terms_number": unique_terms_number,
+        }
+
 
 class Shard:
     def __init__(self, name: str, path: str) -> None:
@@ -93,14 +110,6 @@ class Shard:
 
         return vocabulary
 
-    def term_frequencies(self) -> typing.Counter[str]:
-        frequencies: typing.Counter[str] = Counter()
-
-        for d in self.documents:
-            frequencies.update(d.term_frequencies())
-
-        return frequencies
-
     def index(self, index_type: InvertedIndexType) -> InvertedIndex:
         index = InvertedIndex(index_type)
         if index_type == InvertedIndexType.DOCUMENTS_INDEX:
@@ -136,6 +145,16 @@ class Shard:
                         ]
 
         return index
+
+    def compute_stats(self) -> Stats:
+        stats = Stats()
+
+        stats.documents_number = len(self.documents)
+
+        for d in self.documents:
+            stats.documents[d.id] = d.stats()
+
+        return stats
 
 
 class Collection:
@@ -187,14 +206,8 @@ class Collection:
 
         return vocabulary
 
-    @timer
-    def term_frequencies(self) -> typing.Counter[str]:
-        frequencies: typing.Counter[str] = Counter()
-
-        for s in self.shards:
-            frequencies.update(s.term_frequencies())
-
-        return frequencies
+    def documents_number(self) -> int:
+        return sum([len(s.documents) for s in self.shards])
 
     @timer
     def index(self, index_type: InvertedIndexType) -> InvertedIndex:
@@ -204,3 +217,12 @@ class Collection:
             index.update(s.index(index_type))
 
         return index
+
+    @timer
+    def compute_stats(self) -> Stats:
+        stats = Stats()
+
+        for s in self.shards:
+            stats.update(s.compute_stats())
+
+        return stats
