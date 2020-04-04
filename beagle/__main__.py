@@ -50,12 +50,13 @@ def main() -> None:
         default="./index/",
         help="path to the saved index and stats",
     )
+    engines = ", ".join(engine.value for engine in EngineType)
     search_parser.add_argument(
         "-e",
         "--engine",
         type=EngineType,
         default=EngineType.BINARY_SEARCH,
-        help="the engine to use to perform queries",
+        help=f"the engine to use to perform queries among ({engines})",
     )
 
     args = parser.parse_args()
