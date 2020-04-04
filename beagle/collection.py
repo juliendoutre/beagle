@@ -1,7 +1,8 @@
 import os
 import json
 import typing
-from beagle.index import InvertedIndex, InvertedIndexType
+import json
+from beagle.index import InvertedIndex, InvertedIndexType, DocIndex
 from beagle.stats import Stats
 from typing import List, Set, Dict, Any
 from collections import Counter
@@ -226,3 +227,11 @@ class Collection:
             stats.update(s.compute_stats())
 
         return stats
+
+    def get_doc_index(self) -> Dict[int, Document]:
+        index = DocIndex()
+        for s in self.shards:
+            for d in s.documents:
+                index.entries[d.id] = {"name": d.name, "path": d.path}
+
+        return index
