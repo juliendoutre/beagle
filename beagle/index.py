@@ -2,6 +2,7 @@ from typing import Dict, Any
 from beagle.logging import timer
 from enum import Enum
 import json
+import os
 
 
 class InvertedIndexType(Enum):
@@ -28,6 +29,10 @@ class InvertedIndex:
 
     @timer
     def save(self, path: str) -> None:
+        dirpath = os.path.dirname(path)
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+
         with open(path, "w") as f:
             json.dump({"type": self.type.value, "entries": self.entries}, f)
 
