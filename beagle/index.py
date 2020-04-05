@@ -43,4 +43,26 @@ def load_index(path: str) -> InvertedIndex:
         raw = json.load(f)
         index = InvertedIndex(raw["type"])
         index.entries = raw["entries"]
-        return index
+    return index
+
+
+class DocIndex:
+    def __init__(self) -> None:
+        self.entries: Dict[str, Any] = {}
+
+    @timer
+    def save(self, path: str) -> None:
+        dirpath = os.path.dirname(path)
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+
+        with open(path, "w") as f:
+            return json.dump(self.entries, f)
+
+
+def load_doc_index(path: str) -> DocIndex:
+    with open(path, "r") as f:
+        raw = json.load(f)
+        index = DocIndex()
+        index.entries = raw
+    return index

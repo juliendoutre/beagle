@@ -4,7 +4,7 @@
 import argparse
 from beagle.logging import init_logger
 from beagle.collection import Collection
-from beagle.index import InvertedIndexType, load_index, InvertedIndex
+from beagle.index import InvertedIndexType, load_index, InvertedIndex, load_doc_index
 from beagle.binary_search_engine import BinarySearchEngine
 from beagle.vectorial_search_engine import VectorialSearchEngine
 from beagle.search_engines import EngineType, SearchEngine
@@ -76,9 +76,13 @@ def main() -> None:
 
         stats = collection.compute_stats()
         stats.save(args.output + "stats.json")
+
+        doc_index = collection.get_doc_index()
+        doc_index.save(args.output + "doc_index.json")
     elif args.cmd == "search":
         index = load_index(args.input + "index.json")
         stats = load_stats(args.input + "stats.json")
+        doc_index = load_doc_index(args.input + "doc_index.json")
 
         engine_name = args.engine
         engine = load_engine(index, stats, engine_name)
@@ -116,7 +120,10 @@ def main() -> None:
                     print("unknown command")
             else:
                 try:
-                    print(engine.query(user_input))
+                    results = engine.query(user_input)
+                    for did, score in results.items():
+                        name = doc_index.entries[str(did)]["name"]
+                        print(f"{name}: {score}")
                 except Exception as e:
                     print(e)
 
