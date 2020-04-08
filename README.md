@@ -25,3 +25,7 @@ This is a 170MBs corpus organized in 10 folders. Each file contains a web page t
 ## Stop words
 
 The english stop words list we use (saved in `stop_words.json`) comes from this post : https://gist.github.com/sebleier/554280.
+
+## Report
+
+More details can be found in the project [report](report.md).
