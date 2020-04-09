@@ -283,6 +283,8 @@ The indexing perfoms the following steps:
 - scan the documents in each shard. It lists the documents paths in each shard and create empty `Document` objects saved in each `Shard` list. This step takes about 0.4s on our machines.
 - load all the documents. It calls every `Document`'s `load` method to save their tokens in memory. This step takes about 30s on our machines.
 
+An integer id is attributed to each `Document` at instanciation. Since there are maximum 10 000 documents in a shard, the id is built as follow: `shard_id * 10**6 + document_index_in_the_shard`. Note that this convention would not work if the collection was dynamic (*id* that new documents could be added to shards).
+
 In total, this step takes about 30s which is due to the documents loading.
 We don't really see any possible optimization for this, since we need at some point to get the content of every document to create our index.
 
@@ -350,11 +352,31 @@ We did not implement any compression method since the output is not that heavy.
 Moreover it would have make the saving and loading of the index longer whereas our focus is on the time execution of our commands.
 Finally I am not sure of the way Python is handling its `int` type internally, and so the impact it could have on the gamma code optimization.
 
-However, we witnessed an interesting behavior of Python. At first, our index structure was much more complex and involved several classes that were handling the different data of each part: an `InvertedIndex` stored a list of `InvertedIndexEntry` objects, each one having a `term`, `documents_number` attributes and then a list of objects implementing an `InvertedIndexData` interface (these objects were different following the index type). The idea was to have a modular code that would allow us to hide the index types difference behind an interface and so make the indexing algorithm clearer.
+However, we witnessed an interesting behavior of Python. At first, our index structure was much more complex and involved several classes that were handling the different data of each part: an `InvertedIndex` stored a list of `InvertedIndexEntry` objects, each one having a `term`, `documents_number` attributes and then a list of objects implementing an `InvertedIndexData` interface (these objects were different following the index type). The idea was to have a modular code that would allow us to hide the index types differences behind an interface and so make the indexing algorithm cleaner.
 This approache's performances were disastrous. It was from 10 times to 100 times longer than the indexing times we previously gave, depending on the index type.
-We understood quickly that it was linked to the Python way of handling objects. It is not at all overhead-free as in other languages like Go or Rust that provide zero-cost abstraction. We rolled back to an unstructured index contents.
+We understood quickly that it was linked to the Python way of handling objects. It is not at all overhead-free as in other languages like Go or Rust that provide zero-cost abstractions. We rolled back to an unstructured index contents.
 
 ### Stats
+
+The vectorial search engines requires some statistics about the collection. They are computed at this step.
+
+This is independent of the index type and takes about 5s on our machines, plus less than a second to save them in a JSON file.
+
+### Ids mapping
+
+The `SearchEngine` interface requires the `query` method to return a list of ids of documents. In order to present a readable output to the user, we save a mapping of those ids and the file corresponding paths stored in a `DocIndex` object.
+
+This steps takes less than a second on our machines to be performed and save the mapping in a JSON file.
+
+### Conclusion
+
+To conclude we can identify the steps that are time consuming:
+- load the documents
+- filter and lemmatize them
+- create the index
+- save it
+
+Among these steps, the only one that we could improve further with optimizations seems to be the index creation.
 
 ## Search engine
 
