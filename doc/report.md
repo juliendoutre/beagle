@@ -58,6 +58,21 @@ Since the collection is divided in 10 subdirectory, your project tree shoud look
 └── venv/
 ```
 
+To be able to work, `nltk` needs some dataset to be present on your machine as well.
+You can satisfy this requirement with the following:
+```shell
+(venv) 12:34 julien@julien-XPS-13 ~/dev/beagle% python3
+Python 3.6.9 (default, Nov  7 2019, 10:44:02)
+[GCC 8.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import nltk
+>>> nltk.download("wordnet")
+[nltk_data] Downloading package wordnet to /home/julien/nltk_data...
+[nltk_data]   Package wordnet is already up-to-date!
+True
+>>> exit()
+```
+
 ### Install
 
 In order to avoid polluting your work environment, we recommand to install beagle in a dedicated virtualenv.
@@ -182,6 +197,72 @@ We use this decorator on critical functions whose we want to evaluate the effici
 We use object oriented programming to maintain consistency between the data structures we manipulate and their behaviors.
 
 ![classes diagram](./img/classes_beagle.png)
+
+#### `collection.py`
+
+Classes related to the import, reading and processing of collection's file.
+
+`Document` enables to load the content of a single file to retrieve its tokens. It keeps track of its path so it can be given as an output to the user later on, and assigns it an integer id for internal use. Then it defines several methods to operate on the tokens, such as:
+- filtering them with a stop words list
+- lemmatize them
+and get metadata about them:
+- the document vocabulary (set of distincts tokens)
+- term frequencies (counter of occurences for each term)
+- term positions (dictionnary storing for each term its frequency and a list of its positions in the document)
+- stats (dictionnary storing: the maximum frequency among the terms frequencies, their sum, the number of unique terms in the document)
+
+Since the collection is divided in subdirectories, we introduced an intermediate level of abstraction called a `Shard`, corresponding to all the files in a subdirectory. `Shard` enables to list all the files in its path, and store them as a list of `Document` objects. It can then load, filter and lemmatize all of them, get their overall vocabulary, compute stats about them (see class `Stats`) and finally build a reverse index on them (see class `InvertedIndex`).
+
+Finally, `Collection` is the overall object that operates on a list of shards. It can indeed list the subdirectories in its path to construct a list of `Shard`, load them and perform the same computation they can, but on all the shards, so on all the documents. It can also load a stop words list from a JSON file, and finally build a `DocIndex` that maps documents id to their path (see `DocIndex`).
+
+#### `stats.py`
+
+Classes enabling to compute, save and load collection's statistics.
+
+`Stats` stores in a dictionnary, the number of documents in the collection, andl their statistics:
+- the document vocabulary (set of distincts tokens)
+- term frequencies (counter of occurences for each term)
+- term positions (dictionnary storing for each term its frequency and a list of its positions in the document)
+It has a method to be saved as a `json` file.
+Its `update` method allows to merge two `Stats` objects. It is used by the `Collection` object : when it needs to compute `Stats` for the whole collection, it get the `Stats` of every `Shard` and merge them.
+
+
+The module also contains a function that creates a `Stats` object from a JSON file.
+
+#### `index.py`
+
+Classes related to the creation of inverted indexes.
+
+`InvertedIndeType` is an enumeration of our supported index types. There are three different types:
+- `documents`: a simple list of documents ids that contains a term
+- `frequencies`: a list of documents ids that contains a term and the term occurences in each one
+- `positions`: a list of documents ids that contains a term and the term occurences in each one plus their positions
+
+`InvertedIndex` stores an inverted index as a dictionnary that associates one of the previously described items to each term found in the collection. As the `Stats` class, it can also be saved in a JSON file, and has an update method, used by the `Collection` object to merge the inverted index of all the shards in one.
+
+`DocIndex` stores a mapping between a file path and its id in a dictionnary. It can be saved as a JSON file.
+
+The module also contains functions that create `InvertedIndex` and `DocIndex`objects from JSON files.
+
+#### `search_engines.py`
+
+Interfaces and custom types for search engines.
+
+`SearchEngine` is an interface defined by one method `query` that returns for a query string a dictionnary of documents ids and a score.
+
+`EngineType` is an enumeration of our supported engines: binary or vectorial.
+
+#### `binary_search_engine.py`
+
+Logic to perform boolean research.
+
+`BinarySearchEngine` implements the `SearchEngine` interface. It contains internal methods to preprocess a query, construct a boolean expression tree from it, walk it and return the matching results. Its constructor must receive an `InvertedIndex`.
+
+#### `vectorial_search_engine.py`
+
+Logic to perform boolean research.
+
+`VectorialSearchEngine` implements the `SearchEngine` interface. It contains internal methods to compute tf-idf values for the query and documents in the collection, returning the matching results. Its constructir must receive an `InvertedIndex` and `Stats` about the collection.
 
 ## Dataset
 
