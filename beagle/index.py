@@ -60,6 +60,7 @@ class DocIndex:
             return json.dump(self.entries, f)
 
 
+@timer
 def load_doc_index(path: str) -> DocIndex:
     with open(path, "r") as f:
         raw = json.load(f)

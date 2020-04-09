@@ -24,6 +24,7 @@ class Stats:
             )
 
 
+@timer
 def load_stats(path: str) -> Stats:
     with open(path, "r") as f:
         stats = Stats()

@@ -10,7 +10,6 @@ Rémi Calixte & Julien Doutre
 - [Dataset](#dataset)
 - [Indexing engine](#indexing-engine)
 - [Search engine](#search-engine)
-- [Possible improvements](#possible-improvements)
 
 ## Introduction
 
@@ -335,7 +334,7 @@ We decided to continue with lemmatization. Indeed, this process seems less bruta
 - save it as a JSON file so it can be imported when running the `search` command
 
 Once again we first create an inverted index for each `Shard` that we merge in one final index.
-Here are the results for our different index types:
+Here are the step's performances for our different index types on our machines:
 - documents
   - indexing time: 20s
   - saving time: 5s
@@ -379,14 +378,38 @@ We can identify time consuming steps:
 
 Among these steps, the only one that we could improve with further optimizations (from an execution time perspective) seems to be the index creation.
 
+We noticed that after the end of the last operation, Python took some time (1s to 3s) that must be linked to the garbage collection of the memory we used.
+
 ## Search engine
 
 The `search` commands performs the following steps:
 
 ### Load the index
 
+Since the index type is saved in the JSON, there is no need to pass it as an argument to the search engine. It will automatically create an `InvertedIndex` objects corresponding to the correct contents layout.
+
+Here are the performances for our different index types on our machines:
+- documents: 2s
+- frequencies: 7s
+- positions: 10s
+
+Since there is no need to decompress the data we can hardly improve these loading time.
+
+Then the stats JSON is loaded, which takes approximately 0.1s on our machines. Currently, we load it anyway but we could load it lazily when its usage is truly needed, *ie* when the user wants to perform a query using the vectorial engine.
+
+Finally the ID mapping is loaded which takes approximately 0.1s on our machines.
+
+Then the `SearchEngine` instantiation is almost instantaneous.
+
 ### Boolean requests
 
-### vectorial research
+This engine uses the `ttable` package to build a boolean expression tree with `tt.BooleanExpression(" ".join(tokens__list)).tree`.
+Then we do a recursive DFS on this tree, walking over its `tt.ExpressionTreeNode`.
+Each time the algorithm encounters a boolean connector (`AND`, `OR`, `NAND`) it performs a recursive call over the child nodes inside an intersect, merge or exclude function respectively. These functions returns a list of document ids from two lists of document ids. When the algorithm encounters a leaf (which is a lemmatized term), it returns the list of document ids containing this term by reading the associated inverted index entry.
 
-## Possible improvements
+### Vectorial research
+
+This engine finds the documents whose vector's representation in the terms vectorial space has the highest dot product with the query vector's representation in the same vectorial space.
+The number of returned results is set through the `threshold` attribute. We hardcoded it at 10 for readibility reasons.
+
+We loop over the tokens of the query and get their associate lemmatized term. We fetch the documents ids list that contains this term from the inverted index. For each of these document, we add compute a score for the current term (using tf-idf) and add it to the dot product for this document (stored in a dictionnary). Then we return the reverse sorted list and take only the 10 firsts elements.
