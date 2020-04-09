@@ -28,4 +28,4 @@ The english stop words list we use (saved in `stop_words.json`) comes from this 
 
 ## Report
 
-More details can be found in the project [report](report.md).
+More details can be found in the project [report](./doc/report.md).
