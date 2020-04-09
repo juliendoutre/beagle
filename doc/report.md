@@ -158,13 +158,13 @@ beagle> .exit
 
 ## Repository organization
 
-The code of the package itself is contained in `./beagle`.
+The code of the package itself is contained in [`./beagle`](../beagle).
 
 ![packages dependencies](./img/packages_beagle.png)
 
 ### Setup
 
-The `setup.py` file makes it installable with pip as a CLI tool, with the `main` function defined in `./beagle/__main__.py` as an entry point.
+The [`setup.py`](../setup.py) file makes it installable with pip as a CLI tool, with the `main` function defined in [`./beagle/__main__.py`](../beagle/__main__.py) as an entry point.
 
 ### CLI
 
@@ -172,7 +172,7 @@ This function contains the CLI logic. Its only purpose is to parse the user inpu
 
 ### Logging
 
-The `logging.py` file defines a specific format for out logging messages as well as the `timer` decorator that allows us to measure and print the execution time of a targeted function. Here is an example with the `InvertedIndex.load_index` method:
+The [`logging.py`](../beagle/logging.py) file defines a specific format for out logging messages as well as the `timer` decorator that allows us to measure and print the execution time of a targeted function. Here is an example with the `InvertedIndex.load_index` method:
 - The code:
 ```python
 @timer # the function is decorated
@@ -198,13 +198,14 @@ We use object oriented programming to maintain consistency between the data stru
 
 ![classes diagram](./img/classes_beagle.png)
 
-#### `collection.py`
+#### [`collection.py`](../beagle/collection.py)
 
 Classes related to the import, reading and processing of collection's file.
 
 `Document` enables to load the content of a single file to retrieve its tokens. It keeps track of its path so it can be given as an output to the user later on, and assigns it an integer id for internal use. Then it defines several methods to operate on the tokens, such as:
 - filtering them with a stop words list
 - lemmatize them
+
 and get metadata about them:
 - the document vocabulary (set of distincts tokens)
 - term frequencies (counter of occurences for each term)
@@ -217,7 +218,7 @@ The reason we introduced the `Shard` class is that we wanted to test our first i
 
 Finally, `Collection` is the overall object that operates on a list of shards. It can indeed list the subdirectories in its path to construct a list of `Shard`, load them and perform the same computation they can, but on all the shards, so on all the documents. It can also load a stop words list from a JSON file, and finally build a `DocIndex` that maps documents id to their path (see `DocIndex`).
 
-#### `stats.py`
+#### [`stats.py`](../beagle/stats.py)
 
 Classes enabling to compute, save and load collection's statistics.
 
@@ -226,12 +227,12 @@ Classes enabling to compute, save and load collection's statistics.
 - term frequencies (counter of occurences for each term)
 - term positions (dictionnary storing for each term its frequency and a list of its positions in the document)
 It has a method to be saved as a `json` file.
-Its `update` method allows to merge two `Stats` objects. It is used by the `Collection` object : when it needs to compute `Stats` for the whole collection, it get the `Stats` of every `Shard` and merge them.
+Its `update` method allows to merge two `Stats` objects. It is used by the `Collection` object when it needs to compute `Stats` for the whole collection, it get the `Stats` of every `Shard` and merge them.
 
 
 The module also contains a function that creates a `Stats` object from a JSON file.
 
-#### `index.py`
+#### [`index.py`](../beagle/index.py)
 
 Classes related to the creation of inverted indexes.
 
@@ -246,7 +247,7 @@ Classes related to the creation of inverted indexes.
 
 The module also contains functions that create `InvertedIndex` and `DocIndex`objects from JSON files.
 
-#### `search_engines.py`
+#### [`search_engines.py`](../beagle/search_engines.py)
 
 Interfaces and custom types for search engines.
 
@@ -254,17 +255,17 @@ Interfaces and custom types for search engines.
 
 `EngineType` is an enumeration of our supported engines: binary or vectorial.
 
-#### `binary_search_engine.py`
+#### [`binary_search_engine.py`](../beagle/binary_search_engine.py)
 
 Logic to perform boolean research.
 
 `BinarySearchEngine` implements the `SearchEngine` interface. It contains internal methods to preprocess a query, construct a boolean expression tree from it, walk it and return the matching results. Its constructor must receive an `InvertedIndex`.
 
-#### `vectorial_search_engine.py`
+#### [`vectorial_search_engine.py`](../beagle/vectorial_search_engine.py)
 
 Logic to perform boolean research.
 
-`VectorialSearchEngine` implements the `SearchEngine` interface. It contains internal methods to compute tf-idf values for the query and documents in the collection, returning the matching results. Its constructir must receive an `InvertedIndex` and `Stats` about the collection.
+`VectorialSearchEngine` implements the `SearchEngine` interface. It contains internal methods to compute tf-idf values for the query and documents in the collection, returning the matching results. Its constructor must receive an `InvertedIndex` and `Stats` about the collection.
 
 ## Dataset
 
@@ -283,7 +284,7 @@ The indexing perfoms the following steps:
 - scan the documents in each shard. It lists the documents paths in each shard and create empty `Document` objects saved in each `Shard` list. This step takes about 0.4s on our machines.
 - load all the documents. It calls every `Document`'s `load` method to save their tokens in memory. This step takes about 30s on our machines.
 
-An integer id is attributed to each `Document` at instanciation. Since there are maximum 10 000 documents in a shard, the id is built as follow: `shard_id * 10**6 + document_index_in_the_shard`. Note that this convention would not work if the collection was dynamic (*id* that new documents could be added to shards).
+An integer id is attributed to each `Document` at instanciation. Since there are maximum 10 000 documents in a shard, the id is built as follow: `shard_id * 10**5 + document_index_in_the_shard`. Note that this convention would not work if the collection was dynamic (*id* that new documents could be added to shards).
 
 In total, this step takes about 30s which is due to the documents loading.
 We don't really see any possible optimization for this, since we need at some point to get the content of every document to create our index.
@@ -298,7 +299,7 @@ At first, we thought to build this list from the collection by taking its 200 mo
 ['the', 'of', 'and', 'to', 'stanford', 'in', 'a', 'for', 'on', 'is', '&', 'university', 'by', 'at', 'this', '1', 'with', 'research', 'from', 'are', 'home', 'all', 'center', 'or', 'us', 'page', 'you', 'contact', 'be', 'about', 'that', 'search', 'as', '2', 'news', 'students', 'school', 'program', 'edu', 'your', 'information', 'resources', 'not', 'an', 'new', 'faculty', '3', 'events', 'will', 'can', 'it', 'slac', 'use', '2012', 'education', 'i', 'site', '650', 'department', '2011', 'more', 'have', 'we', 'if', 'programs', 'library', 'may', 'posting', 'student', '4', 'other', 'medicine', 'science', 'e', 'data', 'has', 'one', 'alumni', 'our', 'which', 'people', 'email', 'next', 'staff', 'law', 'overview', 'engineering', 'how', 'terms', 'international', '5', 'forum', 'publications', 'copyright', 's', 'number', 'thread', 'no', 'only', '10', 'find', 'services', 'health', '94305', 'content', 'help', 'community', 'links', 'studies', 'policy', 'graduate', 'text', '12', 'public', 'was', '2010', 'up', 'web', 'login', 'office', 'ca', 'energy', 'author', 'time', 'list', 'project', 'current', 'also', 'development', '11', 'work', 'he', 'their', 'support', 'history', '723', 'pdf', 'get', 'group', 'what', '2009', 'postings', '6', 'see', 'its', 'message', 'depth', 'map', 'pm', 'they', 'institute', 'sciences', '30', '0', 'd', 'view', 'related', 'system', 'medical', 'calendar', 'click', 'service', 'add', 'directions', '8', 'california', 'first', 'display', 'do', 'professor', 'navigation', 'courses', 't', 'please', 'skip', 'lab', '00', 'http', '7', 'campus', 'main', 'systems', 'there', 'technology', 'x', 'projects', 'any', 'class', 'social', 'title', 'request', '2008', 'forums', 'previous', 'rights', 'here', 'who', 'last', 'course', 'these']
 ```
 
-There are indeed words without meaning interest such as `the`, `of`, `to`, etc. But we also do have a lot of words that are interesting and that we want to keep in the documents such as `engineering`, `california`, etc. Their presence in such a big frequency is due to the nature of the collections: it is a university dataset that contains a lot of scientific articles.
+There are indeed words that does not bear any meaning such as `the`, `of`, `to`, etc. But we also do have a lot of words that are interesting and that we want to keep in the documents such as `engineering`, `california`, etc. Their presence in such a big frequency is due to the nature of the collections: it is a university dataset that contains a lot of scientific articles.
 We can see also that file extensions (`pdf`) and protocols nams (`http`) are present. This dataset comes from web pages, so the presence of hyperlinks can explain this result.
 
 This is not a satisfying stop words list since it will remove meaningful information from documents. Instead, we chose to remove english null words following a stop words list established by https://gist.github.com/sebleier/554280. It removes a great deal of words that does not bring context (including their derivated forms). It is only 200 words long.
@@ -370,15 +371,19 @@ This steps takes less than a second on our machines to be performed and save the
 
 ### Conclusion
 
-To conclude we can identify the steps that are time consuming:
+We can identify time consuming steps:
 - load the documents
 - filter and lemmatize them
 - create the index
-- save it
+- save the index
 
-Among these steps, the only one that we could improve further with optimizations seems to be the index creation.
+Among these steps, the only one that we could improve with further optimizations (from an execution time perspective) seems to be the index creation.
 
 ## Search engine
+
+The `search` commands performs the following steps:
+
+### Load the index
 
 ### Boolean requests
 
