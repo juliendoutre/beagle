@@ -213,6 +213,8 @@ and get metadata about them:
 
 Since the collection is divided in subdirectories, we introduced an intermediate level of abstraction called a `Shard`, corresponding to all the files in a subdirectory. `Shard` enables to list all the files in its path, and store them as a list of `Document` objects. It can then load, filter and lemmatize all of them, get their overall vocabulary, compute stats about them (see class `Stats`) and finally build a reverse index on them (see class `InvertedIndex`).
 
+The reason we introduced the `Shard` class is that we wanted to test our first implementations on only a part of the dataset.
+
 Finally, `Collection` is the overall object that operates on a list of shards. It can indeed list the subdirectories in its path to construct a list of `Shard`, load them and perform the same computation they can, but on all the shards, so on all the documents. It can also load a stop words list from a JSON file, and finally build a `DocIndex` that maps documents id to their path (see `DocIndex`).
 
 #### `stats.py`
@@ -266,19 +268,93 @@ Logic to perform boolean research.
 
 ## Dataset
 
-### Description
+The dataset is the Stanford CS276 documents collection (http://web.stanford.edu/class/cs276/pa/pa1-data.zip).
 
-### Statistical analysis
+It contains 98 998 documents with approximately 10 000 documents in each one of its 10 subdirectories (that we call shards in this project).
 
 ## Indexing engine
 
+The indexing perfoms the following steps:
+
 ### Files loading
+
+- instantiate a `Collection` object with the path to the dataset. It is for now an empty object.
+- scan the collection shards. It lists the subdirectories paths in the dataset folder, and creates empty `Shards` objects saved in the `Collection`'s list. This step takes about 0.00006s on our machines.
+- scan the documents in each shard. It lists the documents paths in each shard and create empty `Document` objects saved in each `Shard` list. This step takes about 0.4s on our machines.
+- load all the documents. It calls every `Document`'s `load` method to save their tokens in memory. This step takes about 30s on our machines.
+
+In total, this step takes about 30s which is due to the documents loading.
+We don't really see any possible optimization for this, since we need at some point to get the content of every document to create our index.
 
 ### Stop words
 
+- compute or load a stop words list
+- filter every document with it
+
+At first, we thought to build this list from the collection by taking its 200 most frequent words. This gave us the following list:
+```shell
+['the', 'of', 'and', 'to', 'stanford', 'in', 'a', 'for', 'on', 'is', '&', 'university', 'by', 'at', 'this', '1', 'with', 'research', 'from', 'are', 'home', 'all', 'center', 'or', 'us', 'page', 'you', 'contact', 'be', 'about', 'that', 'search', 'as', '2', 'news', 'students', 'school', 'program', 'edu', 'your', 'information', 'resources', 'not', 'an', 'new', 'faculty', '3', 'events', 'will', 'can', 'it', 'slac', 'use', '2012', 'education', 'i', 'site', '650', 'department', '2011', 'more', 'have', 'we', 'if', 'programs', 'library', 'may', 'posting', 'student', '4', 'other', 'medicine', 'science', 'e', 'data', 'has', 'one', 'alumni', 'our', 'which', 'people', 'email', 'next', 'staff', 'law', 'overview', 'engineering', 'how', 'terms', 'international', '5', 'forum', 'publications', 'copyright', 's', 'number', 'thread', 'no', 'only', '10', 'find', 'services', 'health', '94305', 'content', 'help', 'community', 'links', 'studies', 'policy', 'graduate', 'text', '12', 'public', 'was', '2010', 'up', 'web', 'login', 'office', 'ca', 'energy', 'author', 'time', 'list', 'project', 'current', 'also', 'development', '11', 'work', 'he', 'their', 'support', 'history', '723', 'pdf', 'get', 'group', 'what', '2009', 'postings', '6', 'see', 'its', 'message', 'depth', 'map', 'pm', 'they', 'institute', 'sciences', '30', '0', 'd', 'view', 'related', 'system', 'medical', 'calendar', 'click', 'service', 'add', 'directions', '8', 'california', 'first', 'display', 'do', 'professor', 'navigation', 'courses', 't', 'please', 'skip', 'lab', '00', 'http', '7', 'campus', 'main', 'systems', 'there', 'technology', 'x', 'projects', 'any', 'class', 'social', 'title', 'request', '2008', 'forums', 'previous', 'rights', 'here', 'who', 'last', 'course', 'these']
+```
+
+There are indeed words without meaning interest such as `the`, `of`, `to`, etc. But we also do have a lot of words that are interesting and that we want to keep in the documents such as `engineering`, `california`, etc. Their presence in such a big frequency is due to the nature of the collections: it is a university dataset that contains a lot of scientific articles.
+We can see also that file extensions (`pdf`) and protocols nams (`http`) are present. This dataset comes from web pages, so the presence of hyperlinks can explain this result.
+
+This is not a satisfying stop words list since it will remove meaningful information from documents. Instead, we chose to remove english null words following a stop words list established by https://gist.github.com/sebleier/554280. It removes a great deal of words that does not bring context (including their derivated forms). It is only 200 words long.
+
+We tried both lists on our collection:
+- initial number of tokens: 25498340
+- after removing the top 200 words list: 14423577 so a reduction of 43% in tokens number
+- after removing the stop words list: 18968691 so a reduction of 26% in tokens number
+
+Our stop words list removes less tokens as expected since it does not contains all the words from the top 200 but we assumed that a 25% reduction was a good improvement anyway.
+
+The filtering takes about 60s on our machines (loading the list from a JSON file takes only 0.0001s so is negligible compared to that).
+
 ### Lemmatization
 
-### Vocabulary
+- lemmatize all the documents
+
+We use the `nltk` and its `wordnet` dataset to perform this task.
+
+We tested both lemmatization and stemming:
+- initial vocabulary size: 346904
+- after lemmatization: 335866 so a reduction of 3% in vocabulary size
+- after stemming: 305783 so a reduction of 12% in vocabulary size
+
+The lemmatization takes about 60s on our machines and the stemming 300s.
+This is an unexpected results since the stemming seems less complex to compute than the lemmatization. We do not have an explanation for it yet.
+
+We decided to continue with lemmatization. Indeed, this process seems less brutal to us in the sense that it has less probability to trim a word the wrong way. Since lemmatization is far quicker and has the same magnitude of vocabulary reduction, we think this is a reasonable choice.
+
+### Build the index
+
+- create the collection inverted index
+- save it as a JSON file so it can be imported when running the `search` command
+
+Once again we first create an inverted index for each `Shard` that we merge in one final index.
+Here are the results for our different index types:
+- documents
+  - indexing time: 20s
+  - saving time: 5s
+  - JSON size: 100 MiB
+- frequencies
+  - indexing time: 20s
+  - saving time: 30s
+  - JSON size: 150 MiB
+- positions
+  - indexing time: 60s
+  - saving time: 60s
+  - JSON size: 257.4 MiB
+
+We did not implement any compression method since the output is not that heavy.
+Moreover it would have make the saving and loading of the index longer whereas our focus is on the time execution of our commands.
+Finally I am not sure of the way Python is handling its `int` type internally, and so the impact it could have on the gamma code optimization.
+
+However, we witnessed an interesting behavior of Python. At first, our index structure was much more complex and involved several classes that were handling the different data of each part: an `InvertedIndex` stored a list of `InvertedIndexEntry` objects, each one having a `term`, `documents_number` attributes and then a list of objects implementing an `InvertedIndexData` interface (these objects were different following the index type). The idea was to have a modular code that would allow us to hide the index types difference behind an interface and so make the indexing algorithm clearer.
+This approache's performances were disastrous. It was from 10 times to 100 times longer than the indexing times we previously gave, depending on the index type.
+We understood quickly that it was linked to the Python way of handling objects. It is not at all overhead-free as in other languages like Go or Rust that provide zero-cost abstraction. We rolled back to an unstructured index contents.
+
+### Stats
 
 ## Search engine
 

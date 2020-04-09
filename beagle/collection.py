@@ -40,6 +40,8 @@ class Document:
         for t in self.tokens:
             lems.append(lemmatizer.lemmatize(t))
 
+        self.tokens = lems
+
     def get_vocabulary(self) -> Set[str]:
         return set(self.tokens)
 
@@ -157,6 +159,13 @@ class Shard:
 
         return stats
 
+    def term_frequencies(self) -> typing.Counter[str]:
+        c = Counter()
+        for d in self.documents:
+            c.update(d.term_frequencies())
+
+        return c
+
 
 class Collection:
     def __init__(self, name: str, path: str) -> None:
@@ -219,6 +228,21 @@ class Collection:
 
         return index
 
+    def term_frequencies(self) -> typing.Counter[str]:
+        c = Counter()
+        for s in self.shards:
+            c.update(s.term_frequencies())
+
+        return c
+
+    def tokens_number(self) -> int:
+        l = 0
+        for s in self.shards:
+            for d in s.documents:
+                l += len(d.tokens)
+
+        return l
+
     @timer
     def compute_stats(self) -> Stats:
         stats = Stats()
@@ -228,6 +252,7 @@ class Collection:
 
         return stats
 
+    @timer
     def get_doc_index(self) -> Dict[int, Document]:
         index = DocIndex()
         for s in self.shards:
