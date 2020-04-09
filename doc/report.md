@@ -363,7 +363,7 @@ The vectorial search engines requires some statistics about the collection. They
 
 This is independent of the index type and takes about 5s on our machines, plus less than a second to save them in a JSON file.
 
-### Ids mapping
+### Ids / path mapping
 
 The `SearchEngine` interface requires the `query` method to return a list of ids of documents. In order to present a readable output to the user, we save a mapping of those ids and the file corresponding paths stored in a `DocIndex` object.
 
