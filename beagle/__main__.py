@@ -87,7 +87,7 @@ def main() -> None:
         engine_name = args.engine
         engine = load_engine(index, stats, engine_name)
 
-        print("welcome, to get instructions type .help")
+        print("Welcome! Type .help to get instructions.")
         while True:
             print("beagle>", end=" ")
 

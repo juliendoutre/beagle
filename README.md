@@ -26,9 +26,6 @@ This is a 170MBs corpus organized in 10 folders. Each file contains a web page t
 
 The english stop words list we use (saved in `stop_words.json`) comes from this post : https://gist.github.com/sebleier/554280.
 
-## TODO
+## Report
 
-- compress index saved on disk
-- make vectorial model configurable in cli
-- allow to change models in cli
-- format responses
+More details can be found in the project [report](./doc/report.md).
