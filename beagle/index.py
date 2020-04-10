@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, List
 from beagle.logging import timer
 from enum import Enum
 import json
@@ -58,6 +58,15 @@ class DocIndex:
 
         with open(path, "w") as f:
             return json.dump(self.entries, f)
+
+    def format_results(self, results: Dict[int, float]) -> List[str]:
+        formatted_results: List[str] = []
+
+        for doc_id, score in results.items():
+            doc = self.entries[str(doc_id)]
+            formatted_results.append(f"{doc['name']}: {score} ({doc['path']})")
+
+        return formatted_results
 
 
 @timer
