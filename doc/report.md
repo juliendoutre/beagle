@@ -275,7 +275,19 @@ Logic to perform boolean research.
 
 The dataset is the Stanford CS276 documents collection (http://web.stanford.edu/class/cs276/pa/pa1-data.zip).
 
-It contains 98 998 documents with approximately 10 000 documents in each one of its 10 subdirectories (that we call shards in this project).
+It contains 98 998 documents with about 10 000 documents in each one of its 10 subdirectories (that we call shards in this project):
+```shell
+shard 5: 9997 documents
+shard 2: 10000 documents
+shard 3: 10000 documents
+shard 8: 10000 documents
+shard 4: 9999 documents
+shard 6: 9998 documents
+shard 0: 10000 documents
+shard 9: 9004 documents
+shard 7: 10000 documents
+shard 1: 10000 documents
+```
 
 ## Indexing engine
 
@@ -288,7 +300,7 @@ The indexing perfoms the following steps:
 - scan the documents in each shard. It lists the documents paths in each shard and create empty `Document` objects saved in each `Shard` list. This step takes about 0.4s on our machines.
 - load all the documents. It calls every `Document`'s `load` method to save their tokens in memory. This step takes about 30s on our machines.
 
-An integer id is attributed to each `Document` at instanciation. Since there are maximum 10 000 documents in a shard, the id is built as follow: `shard_id * 10**5 + document_index_in_the_shard`. Note that this convention would not work if the collection was dynamic (*id* that new documents could be added to shards).
+An integer id is attributed to each `Document` at instanciation. Since there are maximum 10 000 documents in a shard, the id is built as follow: `shard_id * 10**4 + document_index_in_the_shard`. Note that this convention would not work if the collection was dynamic (*id* that new documents could be added to shards).
 
 In total, this step takes about 30s which is due to the documents loading.
 We don't really see any possible optimization for this, since we need at some point to get the content of every document to create our index.
