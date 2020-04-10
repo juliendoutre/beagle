@@ -129,7 +129,7 @@ optional arguments:
 ##### Researching
 
 ```shell
-usage: beagle search [-h] [-i INPUT] [-e ENGINE] [query]
+usage: beagle search [-h] [-i INPUT] [-e ENGINE] [-o OUTPUT] [query]
 
 positional arguments:
   query                 A query expression. An empty value will start the
@@ -142,6 +142,9 @@ optional arguments:
   -e ENGINE, --engine ENGINE
                         the engine to use to perform queries among (binary,
                         vectorial) (default: binary)
+  -o OUTPUT, --output OUTPUT
+                        to save the results of a direct query to a file
+                        (default: None)
 ```
 
 Unlike the `index` command, `search` will launch an interactive console that allows the user to enter several requests without the need to reload the index (which is a time-expensive operation) if it is not provided a query argument. The console understands some metacommands, prefixed with a `.` (like in the SQLite prompt):

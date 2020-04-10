@@ -68,6 +68,13 @@ def main() -> None:
         nargs="?",
         help="A query expression. An empty value will start the interactive console.",
     )
+    search_parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        default=None,
+        help="to save the results of a direct query to a file",
+    )
 
     args = parser.parse_args()
     if args.cmd == "index":
@@ -101,9 +108,15 @@ def main() -> None:
             # Direct query
             try:
                 results = engine.query(args.query)
-                for did, score in results.items():
-                    name = doc_index.entries[str(did)]["name"]
-                    print(f"{name}: {score}")
+                if args.output is not None:
+                    with open(args.output, "w") as f:
+                        for did, score in results.items():
+                            name = doc_index.entries[str(did)]["name"]
+                            f.write(f"{name}: {score}\n")
+                else:
+                    for did, score in results.items():
+                        name = doc_index.entries[str(did)]["name"]
+                        print(f"{name}: {score}")
             except Exception as e:
                 print(e)
         else:
