@@ -17,12 +17,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         prog="beagle",
         description="A text search-engine over the Stanford CS276 document collection.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("-v", "--verbose", help="verbose mode", action="store_true")
 
     subparsers = parser.add_subparsers(help="available commands", dest="cmd")
 
     index_parser = subparsers.add_parser("index", help="to index the collection")
+    index_parser.formatter_class = argparse.ArgumentDefaultsHelpFormatter
     index_parser.add_argument(
         "-d", "--dataset", type=str, default="./dataset", help="path to the dataset"
     )
@@ -43,6 +45,7 @@ def main() -> None:
     )
 
     search_parser = subparsers.add_parser("search", help="to query the collection")
+    search_parser.formatter_class = argparse.ArgumentDefaultsHelpFormatter
     search_parser.add_argument(
         "-i",
         "--input",

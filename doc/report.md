@@ -118,11 +118,12 @@ usage: beagle index [-h] [-d DATASET] [-t {documents,frequencies,positions}]
 optional arguments:
   -h, --help            show this help message and exit
   -d DATASET, --dataset DATASET
-                        path to the dataset
+                        path to the dataset (default: ./dataset)
   -t {documents,frequencies,positions}, --type {documents,frequencies,positions}
-                        type of index
+                        type of index (default: positions)
   -o OUTPUT, --output OUTPUT
-                        path to which save the index and stats
+                        path to which save the index and stats (default:
+                        ./index/)
 ```
 
 ##### Researching
@@ -133,10 +134,10 @@ usage: beagle search [-h] [-i INPUT] [-e ENGINE]
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUT, --input INPUT
-                        path to the saved index and stats
+                        path to the saved index and stats (default: ./index/)
   -e ENGINE, --engine ENGINE
                         the engine to use to perform queries among (binary,
-                        vectorial)
+                        vectorial) (default: binary)
 ```
 
 Unlike the `index` command, `search` will launch an interactive console that allows the user to enter several requests without the need to reload the index (which is a time-expensive operation). It can also understand some metacommands, prefixed with a `.` (like in the SQLite prompt):
