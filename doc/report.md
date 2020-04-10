@@ -137,7 +137,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i INPUT, --input INPUT
+  -x INDEX, --index INDEX
                         path to the saved index and stats (default: ./index/)
   -e ENGINE, --engine ENGINE
                         the engine to use to perform queries among (binary,
@@ -149,17 +149,14 @@ optional arguments:
 
 Unlike the `index` command, `search` will launch an interactive console that allows the user to enter several requests without the need to reload the index (which is a time-expensive operation) if it is not provided a query argument. The console understands some metacommands, prefixed with a `.` (like in the SQLite prompt):
 ```shell
-(venv) 11:47 julien@julien-XPS-13 ~/dev/beagle% beagle search
-2020-04-09 11:47:53,634 - root - INFO - Beginning to 'load_index'...
-2020-04-09 11:48:12,006 - root - INFO - Finished to 'load_index' in 18.371545s.
-welcome, to get instructions type .help
+Welcome! Type .help to get instructions
 beagle> .help
-available commands: exit, engine, help, set-engine
-beagle> .engine
-binary
-beagle> .set-engine vectorial
-beagle> .engine
-vectorial
+The available commands are: [exit, engine, help, set-engine, save]
+        .exit                   exit the console
+        .engine                 display the current engine
+        .help                   display this message
+        .set-engine <ENGINE>    change of engine (vectorial or boolean)
+        .save <PATH>            save the previous request results to a file
 beagle> .exit
 ```
 
