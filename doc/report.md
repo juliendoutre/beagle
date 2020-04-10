@@ -129,7 +129,11 @@ optional arguments:
 ##### Researching
 
 ```shell
-usage: beagle search [-h] [-i INPUT] [-e ENGINE]
+usage: beagle search [-h] [-i INPUT] [-e ENGINE] [query]
+
+positional arguments:
+  query                 A query expression. An empty value will start the
+                        interactive console. (default: None)
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -140,7 +144,7 @@ optional arguments:
                         vectorial) (default: binary)
 ```
 
-Unlike the `index` command, `search` will launch an interactive console that allows the user to enter several requests without the need to reload the index (which is a time-expensive operation). It can also understand some metacommands, prefixed with a `.` (like in the SQLite prompt):
+Unlike the `index` command, `search` will launch an interactive console that allows the user to enter several requests without the need to reload the index (which is a time-expensive operation) if it is not provided a query argument. The console understands some metacommands, prefixed with a `.` (like in the SQLite prompt):
 ```shell
 (venv) 11:47 julien@julien-XPS-13 ~/dev/beagle% beagle search
 2020-04-09 11:47:53,634 - root - INFO - Beginning to 'load_index'...

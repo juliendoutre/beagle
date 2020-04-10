@@ -61,6 +61,13 @@ def main() -> None:
         default=EngineType.BINARY_SEARCH,
         help=f"the engine to use to perform queries among ({engines})",
     )
+    search_parser.add_argument(
+        "query",
+        type=str,
+        default=None,
+        nargs="?",
+        help="A query expression. An empty value will start the interactive console.",
+    )
 
     args = parser.parse_args()
     if args.cmd == "index":
@@ -90,45 +97,56 @@ def main() -> None:
         engine_name = args.engine
         engine = load_engine(index, stats, engine_name)
 
-        print("Welcome! Type .help to get instructions.")
-        while True:
-            print("beagle>", end=" ")
+        if args.query is not None:
+            # Direct query
+            try:
+                results = engine.query(args.query)
+                for did, score in results.items():
+                    name = doc_index.entries[str(did)]["name"]
+                    print(f"{name}: {score}")
+            except Exception as e:
+                print(e)
+        else:
+            # Interactive console
+            print("Welcome! Type .help to get instructions.")
+            while True:
+                print("beagle>", end=" ")
 
-            user_input = input()
-            if len(user_input) == 0:
-                print("no input specified")
-                continue
-            if user_input[0] == ".":
-                # special commands
-                cmd_and_margs = user_input[1:].split(" ")
-                cmd = cmd_and_margs[0]
-                margs = cmd_and_margs[1:]
-                if cmd == "exit":
-                    return
-                elif cmd == "engine":
-                    print(engine_name)
-                elif cmd == "help":
-                    help()
-                elif cmd == "set-engine":
-                    if len(margs) == 0:
-                        print("no new engine specified")
-                        continue
-                    if margs[0] not in [engine.value for engine in EngineType]:
-                        print(f"{margs[0]} is not an available engine: {engines}")
-                        continue
-                    engine_name = EngineType(margs[0])
-                    engine = load_engine(index, stats, engine_name)
+                user_input = input()
+                if len(user_input) == 0:
+                    print("no input specified")
+                    continue
+                if user_input[0] == ".":
+                    # special commands
+                    cmd_and_margs = user_input[1:].split(" ")
+                    cmd = cmd_and_margs[0]
+                    margs = cmd_and_margs[1:]
+                    if cmd == "exit":
+                        return
+                    elif cmd == "engine":
+                        print(engine_name)
+                    elif cmd == "help":
+                        help()
+                    elif cmd == "set-engine":
+                        if len(margs) == 0:
+                            print("no new engine specified")
+                            continue
+                        if margs[0] not in [engine.value for engine in EngineType]:
+                            print(f"{margs[0]} is not an available engine: {engines}")
+                            continue
+                        engine_name = EngineType(margs[0])
+                        engine = load_engine(index, stats, engine_name)
 
+                    else:
+                        print("unknown command")
                 else:
-                    print("unknown command")
-            else:
-                try:
-                    results = engine.query(user_input)
-                    for did, score in results.items():
-                        name = doc_index.entries[str(did)]["name"]
-                        print(f"{name}: {score}")
-                except Exception as e:
-                    print(e)
+                    try:
+                        results = engine.query(user_input)
+                        for did, score in results.items():
+                            name = doc_index.entries[str(did)]["name"]
+                            print(f"{name}: {score}")
+                    except Exception as e:
+                        print(e)
 
     else:
         raise parser.error(f"invalid command {args.cmd}")
