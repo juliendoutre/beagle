@@ -49,15 +49,17 @@ class BinarySearchEngine(SearchEngine):
 
 def merge(a: List[int], b: List[int]) -> List[int]:
     result = []
-    i, j = 0, 0
 
-    while i < len(a) and j < len(b):
-        if a[i] < b[j]:
-            result.append(a[i])
-            i += 1
-        else:
-            result.append(b[j])
-            j += 1
+    for i in range(min(len(a), len(b))):
+        result.append(a[i])
+        if b[i] != a[i]:
+            result.append(b[i])
+
+    if len(a) > len(b):
+        result.extend(a)
+
+    if len(b) > len(a):
+        result.extend(b)
 
     return result
 

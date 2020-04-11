@@ -248,7 +248,7 @@ def help() -> None:
     print("\t.exit\t\t\texit the console")
     print("\t.engine\t\t\tdisplay the current engine")
     print("\t.help\t\t\tdisplay this message")
-    print("\t.set-engine <ENGINE>\tchange of engine (vectorial or boolean)")
+    print("\t.set-engine <ENGINE>\tchange of engine (vectorial or binary)")
     print("\t.save <PATH>\t\tsave the previous request results to a file")
 
 

@@ -155,7 +155,7 @@ The available commands are: [exit, engine, help, set-engine, save]
         .exit                   exit the console
         .engine                 display the current engine
         .help                   display this message
-        .set-engine <ENGINE>    change of engine (vectorial or boolean)
+        .set-engine <ENGINE>    change of engine (vectorial or binary)
         .save <PATH>            save the previous request results to a file
 beagle> .exit
 ```
@@ -267,7 +267,7 @@ Logic to perform boolean research.
 
 #### [`vectorial_search_engine.py`](../beagle/vectorial_search_engine.py)
 
-Logic to perform boolean research.
+Logic to perform binary research.
 
 `VectorialSearchEngine` implements the `SearchEngine` interface. It contains internal methods to compute tf-idf values for the query and documents in the collection, returning the matching results. Its constructor must receive an `InvertedIndex` and `Stats` about the collection.
 
@@ -418,7 +418,7 @@ Finally the ID mapping is loaded which takes approximately 0.1s on our machines.
 
 Then the `SearchEngine` instantiation is almost instantaneous.
 
-### Boolean requests
+### Binary research
 
 This engine uses the `ttable` package to build a boolean expression tree with `tt.BooleanExpression(" ".join(tokens__list)).tree`.
 Then we do a recursive DFS on this tree, walking over its `tt.ExpressionTreeNode`.
