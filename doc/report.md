@@ -7,6 +7,7 @@ Rémi Calixte & Julien Doutre
 - [Introduction](#introduction)
 - [Beagle's usage](#beagle's-usage)
 - [Repository organization](#repository-organization)
+- [Tests](#tests)
 - [Dataset](#dataset)
 - [Indexing engine](#indexing-engine)
 - [Search engine](#search-engine)
@@ -270,6 +271,17 @@ Logic to perform boolean research.
 Logic to perform binary research.
 
 `VectorialSearchEngine` implements the `SearchEngine` interface. It contains internal methods to compute tf-idf values for the query and documents in the collection, returning the matching results. Its constructor must receive an `InvertedIndex` and `Stats` about the collection.
+
+## Tests
+
+We use `pytest` for our unit tests.
+
+They are defined in the [tests/](../tests/) directory.
+
+You can run all the tests with
+```shell
+pytest
+```
 
 ## Dataset
 
