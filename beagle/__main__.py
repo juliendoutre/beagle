@@ -7,7 +7,12 @@ from beagle.collection import Collection
 from beagle.index import InvertedIndexType, load_index, InvertedIndex, load_doc_index
 from beagle.binary_search_engine import BinarySearchEngine
 from beagle.vectorial_search_engine import VectorialSearchEngine
-from beagle.search_engines import EngineType, SearchEngine
+from beagle.search_engines import (
+    EngineType,
+    SearchEngine,
+    DocumentPonderation,
+    TermPonderation,
+)
 from beagle.stats import load_stats, Stats
 from typing import List
 from enum import Enum
@@ -178,6 +183,52 @@ def main() -> None:
                         print(
                             f"{TextStyle.OKGREEN}Engine set to {engine}{TextStyle.ENDC}"
                         )
+                    elif cmd == "set-document-ponderation":
+                        if engine.type() == EngineType.BINARY_SEARCH:
+                            print(
+                                f"{TextStyle.WARNING}This option is not available for your current engine{TextStyle.ENDC}"
+                            )
+                            continue
+                        if len(margs) == 0:
+                            print(
+                                f"{TextStyle.WARNING}No new ponderation specified{TextStyle.ENDC}"
+                            )
+                            continue
+                        if margs[0] not in [
+                            ponderation.value for ponderation in DocumentPonderation
+                        ]:
+                            print(
+                                f"{TextStyle.WARNING}{margs[0]} is not an available ponderation{TextStyle.ENDC}"
+                            )
+                            continue
+                        ponderation_name = DocumentPonderation(margs[0])
+                        engine.set_document_ponderation(ponderation_name)
+                        print(
+                            f"{TextStyle.OKGREEN}Document ponderation set to {ponderation_name}{TextStyle.ENDC}"
+                        )
+                    elif cmd == "set-term-ponderation":
+                        if engine.type() == EngineType.BINARY_SEARCH:
+                            print(
+                                f"{TextStyle.WARNING}This option is not available for your current engine{TextStyle.ENDC}"
+                            )
+                            continue
+                        if len(margs) == 0:
+                            print(
+                                f"{TextStyle.WARNING}No new ponderation specified{TextStyle.ENDC}"
+                            )
+                            continue
+                        if margs[0] not in [
+                            ponderation.value for ponderation in TermPonderation
+                        ]:
+                            print(
+                                f"{TextStyle.WARNING}{margs[0]} is not an available ponderation{TextStyle.ENDC}"
+                            )
+                            continue
+                        ponderation_name = TermPonderation(margs[0])
+                        engine.set_term_ponderation(ponderation_name)
+                        print(
+                            f"{TextStyle.OKGREEN}Term ponderation set to {ponderation_name}{TextStyle.ENDC}"
+                        )
                     elif cmd == "save":
                         if len(margs) == 0:
                             print(
@@ -199,7 +250,6 @@ def main() -> None:
                                 print(
                                     f"{TextStyle.WARNING}Nothing to save{TextStyle.ENDC}"
                                 )
-
                     else:
                         print(
                             f"{TextStyle.WARNING}Unknown command: {cmd}{TextStyle.ENDC}"
@@ -249,6 +299,12 @@ def help() -> None:
     print("\t.engine\t\t\tdisplay the current engine")
     print("\t.help\t\t\tdisplay this message")
     print("\t.set-engine <ENGINE>\tchange of engine (vectorial or binary)")
+    print(
+        "\t.set-document-ponderation <PONDERATION>\tchange the vectorial document ponderation scoring (binary, tf, frequency-normalized, log or log-normalized)"
+    )
+    print(
+        "\t.set-term-ponderation <PONDERATION>\tchange the vectorial term ponderation scoring (none, idf, or normalized)"
+    )
     print("\t.save <PATH>\t\tsave the previous request results to a file")
 
 
