@@ -7,6 +7,7 @@ Rémi Calixte & Julien Doutre
 - [Introduction](#introduction)
 - [Beagle's usage](#beagle's-usage)
 - [Repository organization](#repository-organization)
+- [Tests](#tests)
 - [Dataset](#dataset)
 - [Indexing engine](#indexing-engine)
 - [Search engine](#search-engine)
@@ -155,7 +156,7 @@ The available commands are: [exit, engine, help, set-engine, save]
         .exit                   exit the console
         .engine                 display the current engine
         .help                   display this message
-        .set-engine <ENGINE>    change of engine (vectorial or boolean)
+        .set-engine <ENGINE>    change of engine (vectorial or binary)
         .save <PATH>            save the previous request results to a file
 beagle> .exit
 ```
@@ -267,15 +268,38 @@ Logic to perform boolean research.
 
 #### [`vectorial_search_engine.py`](../beagle/vectorial_search_engine.py)
 
-Logic to perform boolean research.
+Logic to perform binary research.
 
 `VectorialSearchEngine` implements the `SearchEngine` interface. It contains internal methods to compute tf-idf values for the query and documents in the collection, returning the matching results. Its constructor must receive an `InvertedIndex` and `Stats` about the collection.
+
+## Tests
+
+We use `pytest` for our unit tests.
+
+They are defined in the [tests/](../tests/) directory.
+
+You can run all the tests with
+```shell
+pytest
+```
 
 ## Dataset
 
 The dataset is the Stanford CS276 documents collection (http://web.stanford.edu/class/cs276/pa/pa1-data.zip).
 
-It contains 98 998 documents with approximately 10 000 documents in each one of its 10 subdirectories (that we call shards in this project).
+It contains 98 998 documents with about 10 000 documents in each one of its 10 subdirectories (that we call shards in this project):
+```shell
+shard 5: 9997 documents
+shard 2: 10000 documents
+shard 3: 10000 documents
+shard 8: 10000 documents
+shard 4: 9999 documents
+shard 6: 9998 documents
+shard 0: 10000 documents
+shard 9: 9004 documents
+shard 7: 10000 documents
+shard 1: 10000 documents
+```
 
 ## Indexing engine
 
@@ -288,7 +312,7 @@ The indexing perfoms the following steps:
 - scan the documents in each shard. It lists the documents paths in each shard and create empty `Document` objects saved in each `Shard` list. This step takes about 0.4s on our machines.
 - load all the documents. It calls every `Document`'s `load` method to save their tokens in memory. This step takes about 30s on our machines.
 
-An integer id is attributed to each `Document` at instanciation. Since there are maximum 10 000 documents in a shard, the id is built as follow: `shard_id * 10**5 + document_index_in_the_shard`. Note that this convention would not work if the collection was dynamic (*id* that new documents could be added to shards).
+An integer id is attributed to each `Document` at instanciation. Since there are maximum 10 000 documents in a shard, the id is built as follow: `shard_id * 10**4 + document_index_in_the_shard`. Note that this convention would not work if the collection was dynamic (*id* that new documents could be added to shards).
 
 In total, this step takes about 30s which is due to the documents loading.
 We don't really see any possible optimization for this, since we need at some point to get the content of every document to create our index.
@@ -406,7 +430,7 @@ Finally the ID mapping is loaded which takes approximately 0.1s on our machines.
 
 Then the `SearchEngine` instantiation is almost instantaneous.
 
-### Boolean requests
+### Binary research
 
 This engine uses the `ttable` package to build a boolean expression tree with `tt.BooleanExpression(" ".join(tokens__list)).tree`.
 Then we do a recursive DFS on this tree, walking over its `tt.ExpressionTreeNode`.

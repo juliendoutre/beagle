@@ -87,7 +87,7 @@ class Shard:
         return f"shard {self.name} ({self.path}): {len(self.documents)} documents"
 
     def scan_documents(self) -> None:
-        id = 10 ** 6 * int(self.name)
+        id = 10 ** 4 * int(self.name)
         for f in os.scandir(self.path):
             if f.is_file():
                 self.documents.append(Document(f.name, f.path, id))

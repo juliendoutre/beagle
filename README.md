@@ -16,6 +16,12 @@ to install the package.
 python3 -m beagle
 ```
 
+## Tests
+
+```shell
+pytest
+```
+
 ## Dataset
 
 The collection can be downloaded here: http://web.stanford.edu/class/cs276/pa/pa1-data.zip.

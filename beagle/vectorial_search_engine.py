@@ -44,7 +44,10 @@ class VectorialSearchEngine(SearchEngine):
         scores: Dict[int, float] = {}
 
         for query_term in query:
-            docs = [d[0] for d in self.index.entries[query_term][1]]
+            try:
+                docs = [d[0] for d in self.index.entries[query_term][1]]
+            except Exception:
+                docs = []
 
             for d in docs:
                 if d in scores:
