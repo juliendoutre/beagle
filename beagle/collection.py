@@ -68,12 +68,14 @@ class Document:
             if frequencies[t] == 1:
                 unique_terms_number += 1
 
+        # we need this step to create a list from a Counter object which behaves like a Dict
         f = [frequencies[t] for t in frequencies]
 
         return {
             "max_frequency": max(f),
-            "summed_frequency": sum(f),
+            "sum_frequency": sum(f),
             "unique_terms_number": unique_terms_number,
+            "tokens_number": len(self.tokens),
         }
 
 

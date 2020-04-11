@@ -13,6 +13,15 @@ from typing import List, Dict
 import math
 
 
+def norm2(vector: Dict[str, float]) -> float:
+    n = 0
+
+    for term in vector:
+        n += vector[term] ** 2
+
+    return math.sqrt(n)
+
+
 class VectorialSearchEngine(SearchEngine):
     def __init__(
         self,
@@ -37,21 +46,23 @@ class VectorialSearchEngine(SearchEngine):
         docs = self.index.entries[term][1]
         for d in docs:
             if d[0] == id:
-                return d[1]
+                return d[1] / self.stats.documents[id]["tokens_number"]
         return 0
 
-    def fn_tf(self, term: str, id: int) -> float:
-        return 0.5 + 0.5 * self.tf(term, id) / self.stats.documents[id]["max_frequency"]
+    def frequency_normalized_tf(self, term: str, id: int) -> float:
+        return 0.5 + 0.5 * self.tf(term, id) / (
+            self.stats.documents[id]["max_frequency"]
+            / self.stats.documents[id]["tokens_number"]
+        )
 
     def log_tf(self, term: str, id: int) -> float:
-        tf = self.tf(term, id)
-        if tf > 0:
-            return 1 + math.log(tf)
-        return 0
+        return 1 + math.log(self.tf(term, id))
 
-    def log_fn_tf(self, term: str, id: int) -> float:
-        avg = self.stats[id]["summed_frequency"] / self.stats[id]["unique_terms_number"]
-        return self.log_tf(term, id) / (1 + math.log(avg))
+    def log_frequency_normalized_tf(self, term: str, id: int) -> float:
+        avg = (
+            self.stats[id]["sum_frequency"] / self.stats.documents[id]["tokens_number"]
+        ) / self.stats[id]["unique_terms_number"]
+        return (1 + self.log_tf(term, id)) / (1 + math.log(avg))
 
     # ponderation functions that depend only on a term
     def idf(self, term: str) -> float:
@@ -111,23 +122,56 @@ class VectorialSearchEngine(SearchEngine):
 
         return vector, norm2(vector)
 
+    def get_document_weight(self, term: str, id: int) -> float:
+        w = 0
+
+        # document ponderation
+        if self.document_ponderation == DocumentPonderation.BINARY:
+            w = 1
+        elif self.document_ponderation == DocumentPonderation.TF:
+            w = self.tf(term, id) / self.stats.documents[id]
+        elif self.document_ponderation == DocumentPonderation.FREQUENCY_NORMALIZED:
+            w = self.frequency_normalized_tf(term, id)
+        elif self.document_ponderation == DocumentPonderation.LOG:
+            w = self.log_tf(term, id)
+        elif self.document_ponderation == DocumentPonderation.LOG_NORMALIZED:
+            w = self.log_frequency_normalized_tf(term, id)
+
+        # term ponderation
+        if self.term_ponderation == TermPonderation.IDF:
+            w *= self.idf(term)
+        elif self.term_ponderation == TermPonderation.NORMALIZED:
+            w *= self.normalized(term)
+
+        return w
+
     # function to compute the score of every document
     def compute_query(self, query: List[str]) -> Dict[int, float]:
         scores: Dict[int, float] = {}
+        norms: Dict[int, float] = {}
 
         q, q_norm = self.build_query_vector(query)
 
-        for query_term in query:
+        # for every query's term
+        for term in q:
+            # We get the doc ids that match this term from the index
             try:
-                docs = [d[0] for d in self.index.entries[query_term][1]]
+                ids = [doc[0] for doc in self.index.entries[term][1]]
             except Exception:
-                docs = []
+                ids = []
 
-            for d in docs:
-                if d in scores:
-                    scores[d] += self.tf(query_term, d)
+            # for every one of them we update their dot product saved un scores
+            for id in ids:
+                w = self.get_document_weight(term, id)
+                if id in scores:
+                    scores[id] += q[term] * w
+                    norms[id] += w ** 2
                 else:
-                    scores[d] = self.tf(query_term, d)
+                    scores[id] = q[term] * w
+                    norms[id] = w ** 2
+        for id in scores:
+            scores[id] /= q_norm
+            scores[id] /= math.sqrt(norms[id])
 
         return scores
 
@@ -159,12 +203,3 @@ class VectorialSearchEngine(SearchEngine):
 
     def type(self) -> str:
         return EngineType.VECTORIAL_SEARCH
-
-
-def norm2(vector: Dict[str, float]) -> float:
-    n = 0
-
-    for term in vector:
-        n += vector[term] ** 2
-
-    return math.sqrt(n)
