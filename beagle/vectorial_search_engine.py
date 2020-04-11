@@ -1,16 +1,46 @@
 from beagle.logging import timer
 from beagle.index import InvertedIndex
-from beagle.search_engines import SearchEngine
+from beagle.search_engines import SearchEngine, EngineType
 from nltk.stem import WordNetLemmatizer
+from enum import Enum
 from beagle.stats import Stats
 from typing import List, Dict
 import math
 
 
+class DocumentPonderation(Enum):
+    BINARY = "binary"
+    TF = "tf"
+    FREQUENCY_NORMALIZED = "frequency-normalized"
+    LOG = "log"
+    LOG_NORMALIZED = "log-normalized"
+
+    def __str__(self) -> str:
+        return self.value
+
+
+class TermPonderation(Enum):
+    NONE = "none"
+    IDF = "idf"
+    NORMALIZED = "normalized"
+
+    def __str__(self) -> str:
+        return self.value
+
+
 class VectorialSearchEngine(SearchEngine):
-    def __init__(self, index: InvertedIndex, stats: Stats, threshold: int) -> None:
+    def __init__(
+        self,
+        index: InvertedIndex,
+        stats: Stats,
+        threshold: int,
+        document_ponderation: DocumentPonderation = DocumentPonderation.TF,
+        term_ponderation: TermPonderation = TermPonderation.NONE,
+    ) -> None:
         self.index: InvertedIndex = index
         self.stats: Stats = stats
+        self.document_ponderation = document_ponderation
+        self.term_ponderation = term_ponderation
         self.threshold: int = threshold
 
     def tf(self, term: str, id: int) -> int:
@@ -72,3 +102,6 @@ class VectorialSearchEngine(SearchEngine):
                 }.items()
             )[: self.threshold]
         }
+
+    def __str__(self) -> str:
+        return f"{EngineType.VECTORIAL_SEARCH.value} ({self.document_ponderation}, {self.term_ponderation})"

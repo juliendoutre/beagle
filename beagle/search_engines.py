@@ -8,6 +8,10 @@ class SearchEngine(abc.ABC):
     def query(self, query: str) -> Dict[int, float]:
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def __str__(self) -> str:
+        raise NotImplementedError
+
 
 class EngineType(Enum):
     BINARY_SEARCH = "binary"

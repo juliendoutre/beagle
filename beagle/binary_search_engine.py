@@ -1,6 +1,6 @@
 from beagle.logging import timer
 from beagle.index import InvertedIndex
-from beagle.search_engines import SearchEngine
+from beagle.search_engines import SearchEngine, EngineType
 from nltk.stem import WordNetLemmatizer
 from typing import List, Dict
 import tt
@@ -45,6 +45,9 @@ class BinarySearchEngine(SearchEngine):
     @timer
     def query(self, query: str) -> Dict[int, float]:
         return {id: 1.0 for id in self.compute_query(self.process_query(query))}
+
+    def __str__(self) -> str:
+        return EngineType.BINARY_SEARCH.value
 
 
 def merge(a: List[int], b: List[int]) -> List[int]:

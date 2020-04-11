@@ -159,7 +159,7 @@ def main() -> None:
                     if cmd == "exit":
                         return
                     elif cmd == "engine":
-                        print(f"Current engine: {engine_name}")
+                        print(f"Current engine: {engine}")
                     elif cmd == "help":
                         help()
                     elif cmd == "set-engine":
@@ -176,7 +176,7 @@ def main() -> None:
                         engine_name = EngineType(margs[0])
                         engine = load_engine(index, stats, engine_name)
                         print(
-                            f"{TextStyle.OKGREEN}Engine set to {engine_name}{TextStyle.ENDC}"
+                            f"{TextStyle.OKGREEN}Engine set to {engine}{TextStyle.ENDC}"
                         )
                     elif cmd == "save":
                         if len(margs) == 0:
