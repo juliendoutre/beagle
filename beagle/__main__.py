@@ -149,6 +149,8 @@ def main() -> None:
             print(
                 f"{TextStyle.OKGREEN}{TextStyle.BOLD}Welcome! Type .help to get instructions{TextStyle.ENDC}"
             )
+            print(f"{TextStyle.OKGREEN}Current engine: {engine}{TextStyle.ENDC}")
+
             while True:
                 print("beagle>", end=" ")
 
@@ -229,6 +231,52 @@ def main() -> None:
                         print(
                             f"{TextStyle.OKGREEN}Term ponderation set to {ponderation_name}{TextStyle.ENDC}"
                         )
+                    elif cmd == "set-query-ponderation":
+                        if engine.type() == EngineType.BINARY_SEARCH:
+                            print(
+                                f"{TextStyle.WARNING}This option is not available for your current engine{TextStyle.ENDC}"
+                            )
+                            continue
+                        if len(margs) == 0:
+                            print(
+                                f"{TextStyle.WARNING}No new ponderation specified{TextStyle.ENDC}"
+                            )
+                            continue
+                        if margs[0] not in [
+                            ponderation.value for ponderation in DocumentPonderation
+                        ]:
+                            print(
+                                f"{TextStyle.WARNING}{margs[0]} is not an available ponderation{TextStyle.ENDC}"
+                            )
+                            continue
+                        ponderation_name = DocumentPonderation(margs[0])
+                        engine.set_query_ponderation(ponderation_name)
+                        print(
+                            f"{TextStyle.OKGREEN}Query ponderation set to {ponderation_name}{TextStyle.ENDC}"
+                        )
+                    elif cmd == "set-query-term-ponderation":
+                        if engine.type() == EngineType.BINARY_SEARCH:
+                            print(
+                                f"{TextStyle.WARNING}This option is not available for your current engine{TextStyle.ENDC}"
+                            )
+                            continue
+                        if len(margs) == 0:
+                            print(
+                                f"{TextStyle.WARNING}No new ponderation specified{TextStyle.ENDC}"
+                            )
+                            continue
+                        if margs[0] not in [
+                            ponderation.value for ponderation in TermPonderation
+                        ]:
+                            print(
+                                f"{TextStyle.WARNING}{margs[0]} is not an available ponderation{TextStyle.ENDC}"
+                            )
+                            continue
+                        ponderation_name = TermPonderation(margs[0])
+                        engine.set_query_term_ponderation(ponderation_name)
+                        print(
+                            f"{TextStyle.OKGREEN}Query term ponderation set to {ponderation_name}{TextStyle.ENDC}"
+                        )
                     elif cmd == "save":
                         if len(margs) == 0:
                             print(
@@ -297,7 +345,19 @@ def load_engine(
 
 
 def help() -> None:
-    cmds = ", ".join(["exit", "engine", "help", "set-engine", "save"])
+    cmds = ", ".join(
+        [
+            "exit",
+            "engine",
+            "help",
+            "set-engine",
+            "set-document-ponderation",
+            "set-term-ponderation",
+            "set-query-ponderation",
+            "set-query-term-ponderation",
+            "save",
+        ]
+    )
     print(f"The available commands are: [{cmds}]")
     print("\t.exit\t\t\texit the console")
     print("\t.engine\t\t\tdisplay the current engine")
@@ -308,6 +368,12 @@ def help() -> None:
     )
     print(
         "\t.set-term-ponderation <PONDERATION>\tchange the vectorial term ponderation scoring (none, idf, or normalized)"
+    )
+    print(
+        "\t.set-query-ponderation <PONDERATION>\tchange the vectorial query ponderation scoring (binary, tf, frequency-normalized, log or log-normalized)"
+    )
+    print(
+        "\t.set-query-term-ponderation <PONDERATION>\tchange the vectorial query term ponderation scoring (none, idf, or normalized)"
     )
     print("\t.save <PATH>\t\tsave the previous request results to a file")
 

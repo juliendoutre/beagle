@@ -189,13 +189,19 @@ class VectorialSearchEngine(SearchEngine):
         }
 
     def __str__(self) -> str:
-        return f"{EngineType.VECTORIAL_SEARCH.value} ({self.document_ponderation}, {self.term_ponderation})"
+        return f"{EngineType.VECTORIAL_SEARCH.value} (documents ponderations: {self.document_ponderation}, {self.term_ponderation} ; query ponderations: {self.query_ponderation}, {self.query_term_ponderation})"
 
     def set_document_ponderation(self, ponderation: DocumentPonderation):
         self.document_ponderation = ponderation
 
     def set_term_ponderation(self, ponderation: TermPonderation):
         self.term_ponderation = ponderation
+
+    def set_query_ponderation(self, ponderation: DocumentPonderation):
+        self.query_ponderation = ponderation
+
+    def set_query_term_ponderation(self, ponderation: TermPonderation):
+        self.query_term_ponderation = ponderation
 
     def type(self) -> str:
         return EngineType.VECTORIAL_SEARCH

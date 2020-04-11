@@ -60,6 +60,12 @@ class BinarySearchEngine(SearchEngine):
     def set_term_ponderation(self, ponderation: TermPonderation):
         pass
 
+    def set_query_ponderation(self, ponderation: DocumentPonderation):
+        pass
+
+    def set_query_term_ponderation(self, ponderation: TermPonderation):
+        pass
+
     def type(self) -> str:
         return EngineType.BINARY_SEARCH
 

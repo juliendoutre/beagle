@@ -49,5 +49,13 @@ class SearchEngine(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def set_query_ponderation(self, ponderation: DocumentPonderation):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_query_term_ponderation(self, ponderation: TermPonderation):
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def type(self) -> str:
         raise NotImplementedError
