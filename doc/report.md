@@ -55,6 +55,7 @@ Since the collection is divided in 10 subdirectory, your project tree shoud look
 ├── requirements.txt
 ├── setup.py
 ├── stop_words.json
+├── tests/
 └── venv/
 ```
 
@@ -151,14 +152,18 @@ optional arguments:
 Unlike the `index` command, `search` will launch an interactive console that allows the user to enter several requests without the need to reload the index (which is a time-expensive operation) if it is not provided a query argument. The console understands some metacommands, prefixed with a `.` (like in the SQLite prompt):
 ```shell
 Welcome! Type .help to get instructions
+Current engine: vectorial (documents ponderations: tf, idf ; query ponderations: tf, none)
 beagle> .help
-The available commands are: [exit, engine, help, set-engine, save]
+The available commands are: [exit, engine, help, set-engine, set-document-ponderation, set-term-ponderation, set-query-ponderation, set-query-term-ponderation, save]
         .exit                   exit the console
         .engine                 display the current engine
         .help                   display this message
         .set-engine <ENGINE>    change of engine (vectorial or binary)
+        .set-document-ponderation <PONDERATION> change the vectorial document ponderation scoring (binary, tf, frequency-normalized, log or log-normalized)
+        .set-term-ponderation <PONDERATION>     change the vectorial term ponderation scoring (none, idf, or normalized)
+        .set-query-ponderation <PONDERATION>    change the vectorial query ponderation scoring (binary, tf, frequency-normalized, log or log-normalized)
+        .set-query-term-ponderation <PONDERATION>       change the vectorial query term ponderation scoring (none, idf, or normalized)
         .save <PATH>            save the previous request results to a file
-beagle> .exit
 ```
 
 ## Repository organization
@@ -217,6 +222,8 @@ and get metadata about them:
 - term positions (dictionnary storing for each term its frequency and a list of its positions in the document)
 - stats (dictionnary storing: the maximum frequency among the terms frequencies, their sum, the number of unique terms in the document)
 
+Note that these frequencies are number of occurences. Indeed we did not want to store float typed values in JSON since we would have lost accuracy. The number of tokens in the document is saved as well so that the real frequencies can be computed later.
+
 Since the collection is divided in subdirectories, we introduced an intermediate level of abstraction called a `Shard`, corresponding to all the files in a subdirectory. `Shard` enables to list all the files in its path, and store them as a list of `Document` objects. It can then load, filter and lemmatize all of them, get their overall vocabulary, compute stats about them (see class `Stats`) and finally build a reverse index on them (see class `InvertedIndex`).
 
 The reason we introduced the `Shard` class is that we wanted to test our first implementations on only a part of the dataset.
@@ -257,6 +264,8 @@ The module also contains functions that create `InvertedIndex` and `DocIndex`obj
 Interfaces and custom types for search engines.
 
 `SearchEngine` is an interface defined by one method `query` that returns for a query string a dictionnary of documents ids and a score.
+
+`DocumentPonderation` and `TermPonderation` enumerations refer to the possible ways of computing the weights of a document or a query in a vectorial approach.
 
 `EngineType` is an enumeration of our supported engines: binary or vectorial.
 
@@ -439,6 +448,5 @@ Each time the algorithm encounters a boolean connector (`AND`, `OR`, `NAND`) it 
 ### Vectorial research
 
 This engine finds the documents whose vector's representation in the terms vectorial space has the highest dot product with the query vector's representation in the same vectorial space.
-The number of returned results is set through the `threshold` attribute. We hardcoded it at 10 for readibility reasons.
 
-We loop over the tokens of the query and get their associate lemmatized term. We fetch the documents ids list that contains this term from the inverted index. For each of these document, we add compute a score for the current term (using tf-idf) and add it to the dot product for this document (stored in a dictionnary). Then we return the reverse sorted list and take only the 10 firsts elements.
+We loop over the tokens of the query and get their associate lemmatized terms. We fetch the documents ids list that contains this term from the inverted index. For each of these document, we compute a score for the current term (using score functions depending on the Engine configuration) and add it to the dot product for this document (stored in a dictionnary). Then we return the reverse sorted list.

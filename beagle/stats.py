@@ -31,6 +31,6 @@ def load_stats(path: str) -> Stats:
 
         raw = json.load(f)
         stats.documents_number = raw["documents_number"]
-        stats.documents = raw["documents"]
+        stats.documents = {int(k): raw["documents"][k] for k in raw["documents"]}
 
         return stats
