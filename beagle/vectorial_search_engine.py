@@ -27,9 +27,8 @@ class VectorialSearchEngine(SearchEngine):
         self,
         index: InvertedIndex,
         stats: Stats,
-        threshold: int,
         document_ponderation: DocumentPonderation = DocumentPonderation.TF,
-        term_ponderation: TermPonderation = TermPonderation.NONE,
+        term_ponderation: TermPonderation = TermPonderation.IDF,
         query_ponderation: DocumentPonderation = DocumentPonderation.TF,
         query_term_ponderation: TermPonderation = TermPonderation.NONE,
     ) -> None:
@@ -39,39 +38,34 @@ class VectorialSearchEngine(SearchEngine):
         self.term_ponderation = term_ponderation
         self.query_ponderation = query_ponderation
         self.query_term_ponderation = query_term_ponderation
-        self.threshold: int = threshold
 
     # ponderation functions that depends on a document and a term
-    def tf(self, term: str, id: int) -> int:
-        docs = self.index.entries[term][1]
-        for d in docs:
-            if d[0] == id:
-                return d[1] / self.stats.documents[id]["tokens_number"]
-        return 0
+    def tf(self, f: int, id: int) -> int:
+        return f / self.stats.documents[id]["tokens_number"]
 
-    def frequency_normalized_tf(self, term: str, id: int) -> float:
-        return 0.5 + 0.5 * self.tf(term, id) / (
+    def frequency_normalized_tf(self, f: int, id: int) -> float:
+        return 0.5 + 0.5 * self.tf(f, id) / (
             self.stats.documents[id]["max_frequency"]
             / self.stats.documents[id]["tokens_number"]
         )
 
-    def log_tf(self, term: str, id: int) -> float:
-        return 1 + math.log(self.tf(term, id))
+    def log_tf(self, f: int, id: int) -> float:
+        return 1 + math.log(self.tf(f, id))
 
-    def log_frequency_normalized_tf(self, term: str, id: int) -> float:
+    def log_frequency_normalized_tf(self, f: int, id: int) -> float:
         avg = (
             self.stats[id]["sum_frequency"] / self.stats.documents[id]["tokens_number"]
         ) / self.stats[id]["unique_terms_number"]
-        return (1 + self.log_tf(term, id)) / (1 + math.log(avg))
+        return (1 + self.log_tf(frozenset, id)) / (1 + math.log(avg))
 
     # ponderation functions that depend only on a term
     def idf(self, term: str) -> float:
-        return math.log(self.stats.documents_number / self.index[term][0])
+        return math.log(self.stats.documents_number / self.index.entries[term][0])
 
     def normalized(self, term: str) -> float:
         return max(
             0,
-            (self.stats.documents_number - self.index[term][0])
+            (self.stats.documents_number - self.index.entries[term][0])
             / self.stats.documents_number,
         )
 
@@ -122,20 +116,20 @@ class VectorialSearchEngine(SearchEngine):
 
         return vector, norm2(vector)
 
-    def get_document_weight(self, term: str, id: int) -> float:
+    def get_document_weight(self, f: int, term: str, id: int) -> float:
         w = 0
 
         # document ponderation
         if self.document_ponderation == DocumentPonderation.BINARY:
             w = 1
         elif self.document_ponderation == DocumentPonderation.TF:
-            w = self.tf(term, id) / self.stats.documents[id]
+            w = self.tf(f, id)
         elif self.document_ponderation == DocumentPonderation.FREQUENCY_NORMALIZED:
-            w = self.frequency_normalized_tf(term, id)
+            w = self.frequency_normalized_tf(f, id)
         elif self.document_ponderation == DocumentPonderation.LOG:
-            w = self.log_tf(term, id)
+            w = self.log_tf(f, id)
         elif self.document_ponderation == DocumentPonderation.LOG_NORMALIZED:
-            w = self.log_frequency_normalized_tf(term, id)
+            w = self.log_frequency_normalized_tf(f, id)
 
         # term ponderation
         if self.term_ponderation == TermPonderation.IDF:
@@ -156,13 +150,15 @@ class VectorialSearchEngine(SearchEngine):
         for term in q:
             # We get the doc ids that match this term from the index
             try:
-                ids = [doc[0] for doc in self.index.entries[term][1]]
+                docs = [(doc[0], doc[1]) for doc in self.index.entries[term][1]]
             except Exception:
-                ids = []
+                docs = []
 
             # for every one of them we update their dot product saved un scores
-            for id in ids:
-                w = self.get_document_weight(term, id)
+            for doc in docs:
+                id = doc[0]
+                f = doc[1]
+                w = self.get_document_weight(f, term, id)
                 if id in scores:
                     scores[id] += q[term] * w
                     norms[id] += w ** 2
@@ -189,7 +185,7 @@ class VectorialSearchEngine(SearchEngine):
                         reverse=True,
                     )
                 }.items()
-            )[: self.threshold]
+            )
         }
 
     def __str__(self) -> str:

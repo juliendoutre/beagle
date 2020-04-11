@@ -285,7 +285,11 @@ def load_engine(
     if engine_name == EngineType.BINARY_SEARCH:
         engine = BinarySearchEngine(index)
     elif engine_name == EngineType.VECTORIAL_SEARCH:
-        engine = VectorialSearchEngine(index, stats, DOCUMENTS_LIST_LIMIT)
+        if index.type == InvertedIndexType.DOCUMENTS_INDEX:
+            raise Exception(
+                f"You cannot use the vectorial engine with a documemts index. Build and save at least a frequency index."
+            )
+        engine = VectorialSearchEngine(index, stats)
     else:
         raise Exception(f"unknown engine: {engine_name}")
 
