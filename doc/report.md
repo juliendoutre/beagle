@@ -465,14 +465,14 @@ We loop over the tokens of the query and get their associate lemmatized terms. W
 
 #### Benchmarks
 
-We had access to a list of queries and the expected outputs.
+We had access to a list of queries and their expected outputs.
 
-**Disclaimer: We assumed that the expected outputs were sorted by relevance but it is not the case. They are simply sorted by shard and by name, which ruined our comparison score. Our results are let here to explain the methodoly we applied but they should not be considered for any deduction about our engine performances. The only thing we can say is that our results lists contain all the expected documents. This is logical: all the documents that contains the term are in the inverted index entry so are returned, only their score can differentiate them.**
+**Disclaimer: We assumed that the expected outputs were sorted by relevance but it is not the case. They are simply sorted by shard and by name, which ruined our comparison score. We let out results in this subsection to explain the methodoly we applied but they should not be considered for any deduction about our engine performances. The only thing we can say is that our results lists contain all the expected documents. This is logical: all the documents that contains the term are in the inverted index entry so are returned, only their relevance score can differentiate them.**
 
 We performed benchmarks to assess the accuracy of our results against some tests queries (you can find them in [tests/queries/query.*](../tests/queries/)).
 The sorted expected results are in [tests/queries/query.*.out](../tests/queries/)) files and the benchmarks scores in [tests/queries/query.*.benchmark](../tests/queries/)).
 
-The possible configurations are simply the cartesian product of the document and terms ponderation for the documents and the query.
+The possible configurations are simply the cartesian product of the document and terms ponderation for the documents and the query. There are 225 of them.
 
 We evaluated the results score by summing for each document in the expected result list `1 / (1 + abs(index(output) - index(expected)))`, *ie* the inverse of the difference of indexes in the ordered results list from our output and the expected ones.
 
