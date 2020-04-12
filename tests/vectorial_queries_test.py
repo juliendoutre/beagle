@@ -74,7 +74,10 @@ class TestVectorialQueries:
         with open(f"./tests/queries/query.{i}.benchmark", "w") as f:
             f.write("\n".join(to_save))
 
-        with open(f"./queries/query.{i}.benchmark", "r") as f:
+    @pytest.mark.skip(reason="this test was used to perform benchmarks")
+    @pytest.mark.parametrize("i", [1, 2, 3, 4, 8])
+    def test_charts(self, i):
+        with open(f"./tests/queries/query.{i}.benchmark", "r") as f:
             _, ax = plt.subplots()
 
             lines = f.readlines()
@@ -92,4 +95,55 @@ class TestVectorialQueries:
                 scores.append(float(data[1]))
 
             _, _, _ = ax.hist(scores, range(276))
-            plt.savefig(f"./queries/query.{i}.benchmark.png")
+            plt.savefig(f"./tests/queries/query.{i}.benchmark.png")
+
+            with open(f"./tests/queries/query.{i}.benchmark.top", "w") as fw:
+                fw.write(
+                    "\n".join(
+                        [
+                            a[0]
+                            for a in sorted(
+                                [
+                                    (line.split(":")[0], line.split(":")[1])
+                                    for line in lines[1:]
+                                ],
+                                key=lambda x: x[1],
+                                reverse=True,
+                            )
+                        ]
+                    )
+                )
+
+    # @pytest.mark.skip(reason="this test was used to perform benchmarks")
+    def test_top(self):
+        top = {}
+
+        for i in [1, 2, 3, 4, 8]:
+            with open(f"./tests/queries/query.{i}.benchmark", "r") as f:
+                lines = f.readlines()
+
+                for line in lines[1:]:
+                    data = line.split(":")
+                    if data[0] not in top:
+                        top[data[0]] = float(data[1])
+                    else:
+                        top[data[0]] += float(data[1])
+
+        _, ax = plt.subplots()
+
+        ax.set_title(f"All requests")
+        ax.set_xlabel("Vectorial engine config")
+        ax.set_ylabel("Score")
+
+        _, _, _ = ax.hist([a / 5 for a in top.values()], range(276))
+        plt.savefig(f"./tests/queries/top.png")
+
+        with open("./tests/queries/top.txt", "w") as fw:
+            fw.write(
+                "\n".join(
+                    [
+                        a[0]
+                        for a in sorted(top.items(), key=lambda x: x[1], reverse=True)
+                    ]
+                )
+            )
