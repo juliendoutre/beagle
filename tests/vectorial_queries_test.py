@@ -34,45 +34,19 @@ def load_expected_results(id: int) -> List[str]:
         return f.read().split("\n")
 
 
-def basic(results: List[str], expected_results: List[str]) -> int:
+def evaluate(results: List[str], expected_results: List[str]) -> int:
     score = 0
 
     for r in expected_results:
         if r in results:
             score += 1
 
-    return score
-
-
-def indexed(results: List[str], expected_results: List[str]) -> int:
-    score = 0
-
-    for i, r in enumerate(expected_results):
-        try:
-            j = results.index(r)
-        except Exception:
-            continue
-        score += 1 / (abs(i - j) + 1)
-
-    return score
-
-
-def normalized(results: List[str], expected_results: List[str]) -> int:
-    score = 0
-
-    for i, r in enumerate(expected_results):
-        try:
-            j = results.index(r)
-        except Exception:
-            continue
-        score += 1 / ((abs(i - j) + 1) * (i + 1))
-
-    return score
+    return score / len(expected_results)
 
 
 class TestVectorialQueries:
-    # @pytest.mark.skip(reason="this test was used to perform benchmarks")
-    @pytest.mark.parametrize("i", [1, 2, 3, 4, 5, 6, 7, 8])
+    @pytest.mark.skip(reason="this test was used to perform benchmarks")
+    @pytest.mark.parametrize("i", [1, 2, 3, 4, 8])
     def test_query(self, index, stats, mapping, i):
         query = load_query(i)
         expected_results = load_expected_results(i)
@@ -89,7 +63,7 @@ class TestVectorialQueries:
             results = [mapping.entries[id]["path"][10:] for id in results_ids]
 
             to_save.append(
-                f"({config[0]},{config[1]},{config[2]},{config[3]}):{basic(results, expected_results)},{indexed(results, expected_results)},{normalized(results, expected_results)}"
+                f"({config[0]},{config[1]},{config[2]},{config[3]}):{evaluate(results, expected_results)}"
             )
 
         with open(f"./tests/queries/query.{i}.benchmark", "w") as f:

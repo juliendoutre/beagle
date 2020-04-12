@@ -297,6 +297,7 @@ pytest
 Some tests are skipped by default. Indeed, they are the ones we used to perform benchmarks of our engines configuration.
 They are very long to run (an hour) since they test every possible configuration of the vectorial engine (there are 225 possible ponderation combinations).
 Their results have been saved and pushed in the [`./tests/queries/`](./tests/queries/) folder.
+They require to have built and saved at least a frequency index at `./index/`.
 
 ## Dataset
 
@@ -422,7 +423,10 @@ We can identify time consuming steps:
 
 Among these steps, the only one that we could improve with further optimizations (from an execution time perspective) seems to be the index creation.
 
-We noticed that after the end of the last operation, Python took some time (1s to 3s) that must be linked to the garbage collection of the memory we used.
+We noticed that after the end of the last operation, Python took some time (1s to 3s) that must be linked to the garbage collection of the used memory.
+
+We added a flag to the command line to avoid the filtering step and see its impact on the index metrics.
+Its size grows to 300 MiB for a position index (the maximum possible growth). The filtering steps is not performed so we win 60s of computation. The index creation becomes a bit longer (about 15s more). However, the time to save it triples. In the end, this does not lead to a lesser execution time but its size does not increase a lot.
 
 ## Search engine
 
@@ -453,16 +457,29 @@ Each time the algorithm encounters a boolean connector (`AND`, `OR`, `NAND`) it 
 
 ### Vectorial research
 
+#### Principle
+
 This engine finds the documents whose vector's representation in the terms vectorial space has the highest dot product with the query vector's representation in the same vectorial space.
 
 We loop over the tokens of the query and get their associate lemmatized terms. We fetch the documents ids list that contains this term from the inverted index. For each of these document, we compute a score for the current term (using score functions depending on the Engine configuration) and add it to the dot product for this document (stored in a dictionnary). Then we return the reverse sorted list.
+
+#### Benchmarks
 
 We performed benchmarks to assess the accuracy of our results against some tests queries (you can find them in [./tests/queries/query.*](./tests/queries/)).
 The sorted expected results are in [./tests/queries/query.*.out](./tests/queries/)) files and the benchmarks scores in [./tests/queries/query.*.benchmark](./tests/queries/)).
 
 The possible configurations are simply the cartesian product of the document and terms ponderation for the documents and the query.
 
-We evaluated the results for several scoring functions:
-- `basic` adds one point for each result in out output that is in the expected output
-- `index` summed for each document `1 / (1 + abs(index(output) - index(expected)))`, *ie* the inverse of the difference of indexes in the ordered results list from our output and the expected ones
-- `normalized` summed for each document `1 / (1 + abs(index(output) - index(expected)))`, *ie* the previous score weigthed by the index in the expected result output index. It gives so more importance to the top results than the last ones.
+We evaluated the results score by summing for each document in the expected result list `1 / (1 + abs(index(output) - index(expected)))`, *ie* the inverse of the difference of indexes in the ordered results list from our output and the expected ones.
+
+We did not tested the requests 5 to 7 because they query the index over stop words.
+With the filtering the results list returned by our engine is empty. Without filtering, we return almost all the documents of the collection since these words are really common.
+
+The results for each test query have been saved separatly in [`./tests/queries/`](./tests/queries/top.png).
+Here follow the histogram of the total scores for each configuration:
+
+![histo](./tests/queries/top.png)
+
+We isolated the sorted configurations in [`./tests/queries/top.txt`](./tests/queries/top.txt).
+
+**We assumed that the expected output were sorted but it is not the case. They are simply sorted by shard and by name, which ruined our comparison score.**
