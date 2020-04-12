@@ -340,7 +340,23 @@ We don't really see any possible optimization for this, since we need at some po
 
 At first, we thought to build this list from the collection by taking its 200 most frequent words. This gave us the following list:
 ```shell
-['the', 'of', 'and', 'to', 'stanford', 'in', 'a', 'for', 'on', 'is', '&', 'university', 'by', 'at', 'this', '1', 'with', 'research', 'from', 'are', 'home', 'all', 'center', 'or', 'us', 'page', 'you', 'contact', 'be', 'about', 'that', 'search', 'as', '2', 'news', 'students', 'school', 'program', 'edu', 'your', 'information', 'resources', 'not', 'an', 'new', 'faculty', '3', 'events', 'will', 'can', 'it', 'slac', 'use', '2012', 'education', 'i', 'site', '650', 'department', '2011', 'more', 'have', 'we', 'if', 'programs', 'library', 'may', 'posting', 'student', '4', 'other', 'medicine', 'science', 'e', 'data', 'has', 'one', 'alumni', 'our', 'which', 'people', 'email', 'next', 'staff', 'law', 'overview', 'engineering', 'how', 'terms', 'international', '5', 'forum', 'publications', 'copyright', 's', 'number', 'thread', 'no', 'only', '10', 'find', 'services', 'health', '94305', 'content', 'help', 'community', 'links', 'studies', 'policy', 'graduate', 'text', '12', 'public', 'was', '2010', 'up', 'web', 'login', 'office', 'ca', 'energy', 'author', 'time', 'list', 'project', 'current', 'also', 'development', '11', 'work', 'he', 'their', 'support', 'history', '723', 'pdf', 'get', 'group', 'what', '2009', 'postings', '6', 'see', 'its', 'message', 'depth', 'map', 'pm', 'they', 'institute', 'sciences', '30', '0', 'd', 'view', 'related', 'system', 'medical', 'calendar', 'click', 'service', 'add', 'directions', '8', 'california', 'first', 'display', 'do', 'professor', 'navigation', 'courses', 't', 'please', 'skip', 'lab', '00', 'http', '7', 'campus', 'main', 'systems', 'there', 'technology', 'x', 'projects', 'any', 'class', 'social', 'title', 'request', '2008', 'forums', 'previous', 'rights', 'here', 'who', 'last', 'course', 'these']
+['the', 'of', 'and', 'to', 'stanford', 'in', 'a', 'for', 'on', 'is', '&', 'university', 'by', 'at', 'this', \
+'1', 'with', 'research', 'from', 'are', 'home', 'all', 'center', 'or', 'us', 'page', 'you', 'contact', 'be', \
+'about', 'that', 'search', 'as', '2', 'news', 'students', 'school', 'program', 'edu', 'your', 'information', \
+'resources', 'not', 'an', 'new', 'faculty', '3', 'events', 'will', 'can', 'it', 'slac', 'use', '2012', \
+'education', 'i', 'site', '650', 'department', '2011', 'more', 'have', 'we', 'if', 'programs', 'library', \
+'may', 'posting', 'student', '4', 'other', 'medicine', 'science', 'e', 'data', 'has', 'one', 'alumni', \
+'our', 'which', 'people', 'email', 'next', 'staff', 'law', 'overview', 'engineering', 'how', 'terms', \
+'international', '5', 'forum', 'publications', 'copyright', 's', 'number', 'thread', 'no', 'only', '10',\
+'find', 'services', 'health', '94305', 'content', 'help', 'community', 'links', 'studies', 'policy',\
+'graduate', 'text', '12', 'public', 'was', '2010', 'up', 'web', 'login', 'office', 'ca', 'energy', 'author',\
+'time', 'list', 'project', 'current', 'also', 'development', '11', 'work', 'he', 'their', 'support',\
+'history', '723', 'pdf', 'get', 'group', 'what', '2009', 'postings', '6', 'see', 'its', 'message',\
+'depth', 'map', 'pm', 'they', 'institute', 'sciences', '30', '0', 'd', 'view', 'related', 'system',\
+'medical', 'calendar', 'click', 'service', 'add', 'directions', '8', 'california', 'first', 'display',\
+'do', 'professor', 'navigation', 'courses', 't', 'please', 'skip', 'lab', '00', 'http', '7', 'campus',\
+'main', 'systems', 'there', 'technology', 'x', 'projects', 'any', 'class', 'social', 'title', 'request',\
+'2008', 'forums', 'previous', 'rights', 'here', 'who', 'last', 'course', 'these']
 ```
 
 There are indeed words that does not bear any meaning such as `the`, `of`, `to`, etc. But we also do have a lot of words that are interesting and that we want to keep in the documents such as `engineering`, `california`, etc. Their presence in such a big frequency is due to the nature of the collections: it is a university dataset that contains a lot of scientific articles.
