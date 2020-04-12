@@ -5,6 +5,8 @@ from beagle.stats import load_stats, Stats
 from beagle.search_engines import DocumentPonderation, TermPonderation
 from beagle.vectorial_search_engine import VectorialSearchEngine
 from typing import List
+import matplotlib
+import matplotlib.pyplot as plt
 
 
 @pytest.fixture
@@ -46,6 +48,9 @@ def evaluate(results: List[str], expected_results: List[str]) -> int:
 
 
 class TestVectorialQueries:
+    @pytest.mark.skip(
+        reason="this test was used to perform benchmarks and is pretty long to run."
+    )
     @pytest.mark.parametrize("i", [1, 2, 3, 4, 5, 6, 7, 8])
     def test_query(self, index, stats, mapping, i):
         query = load_query(i)

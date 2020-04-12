@@ -24,8 +24,9 @@ class TestDocumentStats:
         doc.tokens = [str(i) for i in range(10)]
         assert doc.stats() == {
             "max_frequency": 1,
-            "summed_frequency": 10,
+            "sum_frequency": 10,
             "unique_terms_number": 10,
+            "tokens_number": 10,
         }
 
     def test_without_unique_terms(self):
@@ -33,8 +34,9 @@ class TestDocumentStats:
         doc.tokens = [str(1)] * 10 + [str(2)] * 6
         assert doc.stats() == {
             "max_frequency": 10,
-            "summed_frequency": 16,
+            "sum_frequency": 16,
             "unique_terms_number": 0,
+            "tokens_number": 16,
         }
 
 
