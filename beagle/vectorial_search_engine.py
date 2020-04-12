@@ -54,9 +54,12 @@ class VectorialSearchEngine(SearchEngine):
 
     def log_frequency_normalized_tf(self, f: int, id: int) -> float:
         avg = (
-            self.stats[id]["sum_frequency"] / self.stats.documents[id]["tokens_number"]
-        ) / self.stats[id]["unique_terms_number"]
-        return (1 + self.log_tf(frozenset, id)) / (1 + math.log(avg))
+            self.stats.documents[id]["sum_frequency"]
+            / self.stats.documents[id]["tokens_number"]
+        ) / (
+            self.stats.documents[id]["unique_terms_number"] + 1
+        )  # we add 1 to avoid zero division errors
+        return (1 + self.log_tf(f, id)) / (1 + math.log(avg))
 
     # ponderation functions that depend only on a term
     def idf(self, term: str) -> float:

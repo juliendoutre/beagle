@@ -1,3 +1,2 @@
 nltk==3.4.5
 ttable==0.6.3
-pytest== 5.4.1
