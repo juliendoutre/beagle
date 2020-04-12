@@ -115,7 +115,7 @@ optional arguments:
 
 ```shell
 usage: beagle index [-h] [-d DATASET] [-t {documents,frequencies,positions}]
-                    [-o OUTPUT]
+                    [-o OUTPUT] [-f]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -126,6 +126,8 @@ optional arguments:
   -o OUTPUT, --output OUTPUT
                         path to which save the index and stats (default:
                         ./index/)
+  -f, --no-filter       do not filter the tokens with the stop words list
+                        (default: False)
 ```
 
 ##### Researching
@@ -292,6 +294,10 @@ You can run all the tests with
 pytest
 ```
 
+Some tests are skipped by default. Indeed, they are the ones we used to perform benchmarks of our engines configuration.
+They are very long to run (an hour) since they test every possible configuration of the vectorial engine (there are 225 possible ponderation combinations).
+Their results have been saved and pushed in the [`./tests/queries/`](./tests/queries/) folder.
+
 ## Dataset
 
 The dataset is the Stanford CS276 documents collection (http://web.stanford.edu/class/cs276/pa/pa1-data.zip).
@@ -450,3 +456,13 @@ Each time the algorithm encounters a boolean connector (`AND`, `OR`, `NAND`) it 
 This engine finds the documents whose vector's representation in the terms vectorial space has the highest dot product with the query vector's representation in the same vectorial space.
 
 We loop over the tokens of the query and get their associate lemmatized terms. We fetch the documents ids list that contains this term from the inverted index. For each of these document, we compute a score for the current term (using score functions depending on the Engine configuration) and add it to the dot product for this document (stored in a dictionnary). Then we return the reverse sorted list.
+
+We performed benchmarks to assess the accuracy of our results against some tests queries (you can find them in [./tests/queries/query.*](./tests/queries/)).
+The sorted expected results are in [./tests/queries/query.*.out](./tests/queries/)) files and the benchmarks scores in [./tests/queries/query.*.benchmark](./tests/queries/)).
+
+The possible configurations are simply the cartesian product of the document and terms ponderation for the documents and the query.
+
+We evaluated the results for several scoring functions:
+- `basic` adds one point for each result in out output that is in the expected output
+- `index` summed for each document `1 / (1 + abs(index(output) - index(expected)))`, *ie* the inverse of the difference of indexes in the ordered results list from our output and the expected ones
+- `normalized` summed for each document `1 / (1 + abs(index(output) - index(expected)))`, *ie* the previous score weigthed by the index in the expected result output index. It gives so more importance to the top results than the last ones.

@@ -54,7 +54,10 @@ def main() -> None:
         help="path to which save the index and stats",
     )
     index_parser.add_argument(
-        "-f", "--no-filter", help="verbose mode", action="store_true"
+        "-f",
+        "--no-filter",
+        help="do not filter the tokens with the stop words list",
+        action="store_true",
     )
 
     search_parser = subparsers.add_parser("search", help="to query the collection")
