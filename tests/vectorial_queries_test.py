@@ -73,3 +73,23 @@ class TestVectorialQueries:
 
         with open(f"./tests/queries/query.{i}.benchmark", "w") as f:
             f.write("\n".join(to_save))
+
+        with open(f"./queries/query.{i}.benchmark", "r") as f:
+            _, ax = plt.subplots()
+
+            lines = f.readlines()
+
+            ax.set_title(f"{lines[0]}")
+            ax.set_xlabel("Vectorial engine config")
+            ax.set_ylabel("Score")
+
+            labels = []
+            scores = []
+
+            for line in lines[1:]:
+                data = line.split(":")
+                labels.append(data[0])
+                scores.append(float(data[1]))
+
+            _, _, _ = ax.hist(scores, range(276))
+            plt.savefig(f"./queries/query.{i}.benchmark.png")
