@@ -465,8 +465,12 @@ We loop over the tokens of the query and get their associate lemmatized terms. W
 
 #### Benchmarks
 
-We performed benchmarks to assess the accuracy of our results against some tests queries (you can find them in [./tests/queries/query.*](./tests/queries/)).
-The sorted expected results are in [./tests/queries/query.*.out](./tests/queries/)) files and the benchmarks scores in [./tests/queries/query.*.benchmark](./tests/queries/)).
+We had access to a list of queries and the expected outputs.
+
+**Disclaimer: We assumed that the expected outputs were sorted by relevance but it is not the case. They are simply sorted by shard and by name, which ruined our comparison score. Our results are let here to explain the methodoly we applied but they should not be considered for any deduction about our engine performances. The only thing we can say is that our results lists contain all the expected documents. This is logical: all the documents that contains the term are in the inverted index entry so are returned, only their score can differentiate them.**
+
+We performed benchmarks to assess the accuracy of our results against some tests queries (you can find them in [tests/queries/query.*](../tests/queries/)).
+The sorted expected results are in [tests/queries/query.*.out](../tests/queries/)) files and the benchmarks scores in [tests/queries/query.*.benchmark](../tests/queries/)).
 
 The possible configurations are simply the cartesian product of the document and terms ponderation for the documents and the query.
 
@@ -475,11 +479,9 @@ We evaluated the results score by summing for each document in the expected resu
 We did not tested the requests 5 to 7 because they query the index over stop words.
 With the filtering the results list returned by our engine is empty. Without filtering, we return almost all the documents of the collection since these words are really common.
 
-The results for each test query have been saved separatly in [`./tests/queries/`](./tests/queries/top.png).
+The results for each test query have been saved separatly in [`tests/queries/`](../tests/queries/).
 Here follow the histogram of the total scores for each configuration:
 
-![histo](./tests/queries/top.png)
+![histo](../tests/queries/top.png)
 
-We isolated the sorted configurations in [`./tests/queries/top.txt`](./tests/queries/top.txt).
-
-**We assumed that the expected output were sorted but it is not the case. They are simply sorted by shard and by name, which ruined our comparison score.**
+We isolated the by-score-sorted configurations in [`tests/queries/top.txt`](../tests/queries/top.txt).

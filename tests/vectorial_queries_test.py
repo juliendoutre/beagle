@@ -37,11 +37,14 @@ def load_expected_results(id: int) -> List[str]:
 def evaluate(results: List[str], expected_results: List[str]) -> int:
     score = 0
 
-    for r in expected_results:
-        if r in results:
-            score += 1
+    for i, r in enumerate(expected_results):
+        try:
+            j = results.index(r)
+        except Exception:
+            continue
+        score += 1 / (abs(i - j) + 1)
 
-    return score / len(expected_results)
+    return score
 
 
 class TestVectorialQueries:
