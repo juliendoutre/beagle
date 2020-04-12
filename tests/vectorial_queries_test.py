@@ -114,7 +114,7 @@ class TestVectorialQueries:
                     )
                 )
 
-    # @pytest.mark.skip(reason="this test was used to perform benchmarks")
+    @pytest.mark.skip(reason="this test was used to perform benchmarks")
     def test_top(self):
         top = {}
 
